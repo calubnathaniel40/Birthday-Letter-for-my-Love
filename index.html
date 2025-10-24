@@ -1,29 +1,652 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Happy Birthday, My Love 💖</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Happy Birthday — For My Love 💖</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+/* ---------- BASE / LAYOUT / DREAMY VISUAL STYLES ---------- */
+:root {
+  /* Updated Cute Colors */
+  --color-pink-light: #ffc0d6;
+  --color-pink-bright: #ff85a2;
+  --color-text-light: #ffe6ef;
+  --color-green-light: #b6ffc1;
+  
+  /* Updated Animated Background Colors */
+  --deep-bg-pink: #4d1a36;
+  --deep-bg-green: #1a4d2f;
+  --deep-bg-blue: #1a364d;
+  --deep-bg-purple: #361a4d;
+  
+  --glass: rgba(255, 240, 245, 0.08);
+  --glass-border: rgba(255, 192, 203, 0.18);
+  --shadow-pink: 0 0 25px rgba(255, 182, 193, 0.8);
+  --shadow-green: 0 0 25px rgba(182, 255, 193, 0.8);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%}
+body{
+  font-family:"Poppins",system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  /* Updated background with new colors */
+  background: radial-gradient(circle at 35% 20%, var(--deep-bg-pink), #000000 40%);
+  color:#fff;
+  -webkit-font-smoothing:antialiased;
+  overflow-y:auto;
+}
+
+/* Intro */
+#intro-screen{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
+  background:linear-gradient(180deg, rgba(0,0,0,0.95), rgba(8,3,10,0.98));z-index:120;padding:20px;text-align:center;
+}
+#intro-screen h1{font-family:"Great Vibes",cursive;font-size:2.7rem;color:var(--color-pink-light);text-shadow:0 6px 30px rgba(255,120,160,0.18)}
+#intro-screen .sub{color:rgba(255,220,235,0.9)}
+#start-btn{
+  background:linear-gradient(45deg, var(--color-pink-bright), var(--color-pink-light));
+  border:none;color:#fff;padding:12px 30px;border-radius:28px;font-weight:600;cursor:pointer;
+  /* Changed shadow to green for contrast */
+  box-shadow: 0 0 30px rgba(182, 255, 193, 0.6);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+#start-btn:hover, #start-btn:focus{
+  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(182, 255, 193, 0.9);
+}
+#start-btn:active{transform:scale(.995)}
+
+/* App layout */
+.hidden{display:none}
+#app{min-height:100vh;padding:20px 16px 90px;max-width:1100px;margin:0 auto;position:relative;z-index:2}
+.hero{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.title{font-family:"Great Vibes",cursive;font-size:2.1rem;color:#ffd1dc;margin:10px 0 18px;text-shadow:0 0 12px var(--color-pink-bright)}
+.controls{display:flex;gap:8px}
+.btn-small{background:#ffe6ee;border:none;padding:8px 10px;color:#5a1a2a;border-radius:10px;cursor:pointer}
+
+/* background decor + NEW multi-color animation */
+#bg-decor{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background: radial-gradient(circle at center, var(--deep-bg-pink), #000);
+  animation: bgShift 30s ease-in-out infinite alternate;
+}
+@keyframes bgShift {
+  0% { background: radial-gradient(circle at center, var(--deep-bg-pink), #000); }
+  25% { background: radial-gradient(circle at center, var(--deep-bg-green), #000); }
+  50% { background: radial-gradient(circle at center, var(--deep-bg-blue), #000); }
+  75% { background: radial-gradient(circle at center, var(--deep-bg-purple), #000); }
+  100% { background: radial-gradient(circle at center, var(--deep-bg-pink), #000); }
+}
+
+
+/* --- NEW 3D FLIP CARD GALLERY --- */
+.gallery-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  z-index: 3;
+}
+
+/* This container sets the 3D perspective */
+.flip-card-container {
+  width: 300px;
+  height: 380px;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+/* This is the card that will flip */
+.flip-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 1s ease, opacity 1.5s ease;
+  transform-style: preserve-3d;
+  opacity: 0.3; /* Start faded out */
+}
+
+/* This class is toggled by JS to flip */
+.flip-card.is-flipped {
+  transform: rotateY(180deg);
+}
+/* This class is added by JS to show the card */
+.flip-card.active {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* Common styles for front and back */
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden; /* Hides the side facing away */
+  border-radius: 20px;
+  
+  /* Dreamy glass effect */
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Front of the card (Photo) */
+.flip-card-front {
+  box-shadow: var(--shadow-green);
+}
+.flip-card-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 1s ease;
+}
+
+/* Back of the card (Caption) */
+.flip-card-back {
+  transform: rotateY(180deg);
+  box-shadow: var(--shadow-pink);
+  padding: 20px;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: var(--color-text-light);
+}
+/* --- END OF 3D FLIP CARD GALLERY --- */
+
+
+/* letter */
+#letterBox{display:block;width:100%;max-width:860px;margin:16px auto 20px;position:relative;z-index:4}
+#typed{background:var(--glass);border-radius:18px;padding:28px;font-family:"Great Vibes",cursive;font-size:1.35rem;line-height:1.7;color:var(--color-text-light);box-shadow:0 18px 60px rgba(0,0,0,0.6);backdrop-filter: blur(6px);max-height:60vh;overflow:auto;border:1px solid var(--glass-border)}
+#typed.typing::after {
+  content: '...'; /* Blinking cursor */
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* final overlay */
+#finalOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(180deg, rgba(10,2,8,0.6), rgba(0,0,0,0.9));z-index:400;opacity:0;pointer-events:none;transition:opacity 1s ease}
+#finalOverlay.show{opacity:1;pointer-events:auto}
+#finalOverlay h1{font-family:"Great Vibes",cursive;font-size:2.8rem;color:#ffd1dc;margin-bottom:10px}
+#finalOverlay p{color:#ffe7ef;margin-bottom:16px;text-align:center;max-width:90%}
+
+/* floating/choreography helpers */
+.float{position:fixed;pointer-events:none;user-select:none;z-index:150; font-size: 18px;}
+.glowDot{
+  position:fixed;width:10px;height:10px;border-radius:50%;
+  /* Animate the glow dots to change color */
+  animation: colorGlow 10s infinite alternate;
+  filter:blur(6px);z-index:50;pointer-events:none;
+}
+@keyframes colorGlow {
+  0% { background: rgba(255,182,193,.45); }
+  50% { background: rgba(182, 255, 193, 0.45); }
+  100% { background: rgba(182, 193, 255, 0.45); }
+}
+
+/* audio elements hidden */
+audio{display:none}
+
+/* responsiveness */
+@media(min-width:760px){ 
+  #typed{font-size:1.65rem} 
+}
+@media(max-width:420px){ 
+  .title{font-size:1.9rem} 
+  #typed{font-size:1.05rem;max-height:65vh} 
+  .flip-card-container { width: 280px; height: 360px; }
+}
+</style>
 </head>
 <body>
-  <div id="intro-screen">
-    <h1>Happy Birthday, My Baby 🎂</h1>
-    <button id="start-btn">💖 Start 💖</button>
-  </div>
 
-  <div id="app">
-    <h2>Our Moments 💞</h2>
-    <div class="gallery">
-      <img src="set1-1.jpg" class="photo active">
-      <img src="set1-2.jpg" class="photo">
-      <img src="set1-3.jpg" class="photo">
-      <img src="set1-4.jpg" class="photo">
+<div id="intro-screen" role="dialog" aria-modal="true">
+  <h1>Happy Birthday, My Baby 🎂</h1>
+  <p class="sub">Tap Start to begin (audio requires a tap)</p>
+  <button id="start-btn" class="btn-primary">💖 Start</button>
+</div>
+
+<main id="app" class="hidden" aria-live="polite" aria-hidden="true">
+  <div id="bg-decor" aria-hidden="true"></div>
+
+  <header class="hero">
+    <h2 class="title">Our Moments 💞</h2>
+    <div class="controls">
+      <button id="downloadPdf" class="btn-small">Download Letter (PDF)</button>
+      <button id="muteBtn" class="btn-small">Mute</button>
     </div>
-    <div id="typed-text"></div>
-  </div>
+  </header>
 
-  <script src="js/script.js"></script>
+  <section class="gallery-wrap">
+    
+    <div class="flip-card-container">
+      <div class="flip-card" id="gallery-card">
+        
+        <div class="flip-card-front">
+          <img id="gallery-image" src="" alt="Our Moment">
+        </div>
+        
+        <div class="flip-card-back">
+          <p id="gallery-caption"></p>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+  <section id="letterBox">
+    <div id="typed" class="typing"></div>
+  </section>
+</main>
+
+<div id="finalOverlay" aria-hidden="true">
+  <h1>I’ll love you forever — Nathan 💞</h1>
+  <p>Happy Birthday, my everything. Thank you for being you.</p>
+  <button id="finalClose" class="btn-primary">Close</button>
+</div>
+
+<audio id="audio-song-1" preload="auto"></audio>
+<audio id="audio-song-2" preload="auto"></audio>
+<audio id="audio-song-3" preload="auto"></audio>
+<audio id="audio-song-4" preload="auto"></audio>
+<audio id="audio-voice" preload="auto"></audio>
+
+<script>
+/* ===================== CONFIG - Add your content here ===================== */
+const CONFIG = {
+  songs: [
+    {file: "song1.mp3", title: "123 — Over October"},
+    {file: "song2.mp3", title: "Until I Found Her"},
+    {file: "song3.mp3", title: "Ikaw Pa Rin Ang Pipiliin Ko"},
+    {file: "song4.mp3", title: "Leonora"}
+  ],
+
+  // NEW SIMPLIFIED PHOTO GALLERY
+  // Just add your image files and captions here.
+  photos: [
+    {src: "set1-1.jpg", caption: "EO yarn?"},
+    {src: "set1-2.jpg", caption: "Road trip memories"},
+    {src: "set1-3.jpg", caption: "Bleehhbleehhh"},
+    {src: "set1-4.jpg", caption: "EK Moments"},
+    {src: "set2-1.jpg", caption: "Random galaa"},
+    {src: "set2-2.jpg", caption: "Picture muna kayo?!"},
+    {src: "set2-3.jpg", caption: "Birthdate?"},
+    {src: "set2-4.jpg", caption: "Watch your sport"},
+    // Add as many more as you like
+  ],
+  
+  voiceNote: "voice.mp3", // optional; place voice.mp3 or leave blank ""
+  
+  letter: `Happy Birthday, my baby!
+
+Today is your special day, but honestly every day with you already feels special. Still, I want this day to be extra memorable because it’s not just about celebrating your birthday, it’s about celebrating you. The person who makes my world brighter, my heart calmer, and my life so much better just by being in it.
+
+You’ve brought so much happiness into my life. You’ve shown me what real love feels like not the perfect but the real kind, where we learn, grow, and hold on to each other no matter what. I’m so thankful for every laugh we’ve shared, every kwentalks, every moment we just sit together doing nothing but still feeling everything. Those moments mean more to me than I can ever explain.
+I know we’ve had our ups and downs, but that’s what makes us stronger. We’re learning, we’re growing, and we’re loving through it all. I’m proud of us, proud of how far we’ve come and how we always find our way back to each other. You’re my peace, my safe place, and my favorite person to be with.
+
+I wish for your happiness always not just today, but every single day that follows. I hope you keep chasing your dreams, smiling your beautiful smile, and knowing that I’ll always be here cheering for you, supporting you, and loving you with all that I am.
+
+I can’t wait to celebrate not just your birthdays but every milestone, every success, every little thing that makes life worth living together.
+You deserve all the love, joy, and peace in the world. And I promise to do my best to give you all of that and more. Thank you for choosing me, for staying, and for loving me in ways I never thought I deserved.
+
+Happy birthday, my love. Here’s to you, to us, and to a lifetime of celebrating together.`,
+};
+/* ===================== end CONFIG ===================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ---------- STATE ---------- */
+  let audioCtx = null;
+  let masterGain = null;
+  let mediaSources = [];
+  let gainNodes = [];
+  let isMuted = false;
+  let galleryInterval = null;
+  const CROSSFADE_TIME = 3.0; // Start next song 3s before current one ends
+
+  /* ---------- ELEMENTS (Fixed IDs) ---------- */
+  const intro = document.getElementById('intro-screen');
+  const startBtn = document.getElementById('start-btn');
+  const app = document.getElementById('app');
+  
+  // NEW Gallery Elements
+  const galleryCard = document.getElementById('gallery-card');
+  const galleryImage = document.getElementById('gallery-image');
+  const galleryCaption = document.getElementById('gallery-caption');
+
+  const typedEl = document.getElementById('typed');
+  const letterBox = document.getElementById('letterBox');
+  const downloadPdf = document.getElementById('downloadPdf');
+  const muteBtn = document.getElementById('muteBtn');
+  const finalOverlay = document.getElementById('finalOverlay');
+  const finalClose = document.getElementById('finalClose');
+  const bgDecor = document.getElementById('bg-decor');
+
+  /* ---------- PREPARE audio elements ---------- */
+  const audioEls = CONFIG.songs.map((s, i) => {
+    const el = document.getElementById(`audio-song-${i+1}`);
+    el.src = s.file;
+    el.preload = 'auto';
+    el.crossOrigin = "anonymous";
+    return el;
+  });
+  const voiceEl = document.getElementById('audio-voice');
+  if (CONFIG.voiceNote) {
+    voiceEl.src = CONFIG.voiceNote;
+    voiceEl.preload = 'auto';
+  }
+
+  /* ---------- WebAudio setup for crossfade ---------- */
+  function initAudioContext() {
+    if (audioCtx) return;
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = isMuted ? 0 : 1;
+      masterGain.connect(audioCtx.destination);
+
+      audioEls.forEach((audioEl, idx) => {
+        const src = audioCtx.createMediaElementSource(audioEl);
+        const g = audioCtx.createGain();
+        g.gain.value = 0; // Start all silent
+        src.connect(g);
+        g.connect(masterGain);
+        mediaSources[idx] = src;
+        gainNodes[idx] = g;
+      });
+    } catch (e) {
+      console.error("Web Audio API is not supported in this browser or failed to init.", e);
+    }
+  }
+
+  function crossfadeTo(index, fadeSec = 2.0) {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    gainNodes.forEach((g, idx) => {
+      try {
+        g.gain.cancelScheduledValues(now);
+        g.gain.setValueAtTime(g.gain.value, now);
+        const targetValue = (idx === index) ? 1.0 : 0.0;
+        g.gain.linearRampToValueAtTime(targetValue, now + fadeSec);
+      } catch (err) {
+        console.warn("Error during crossfade node.", err);
+      }
+    });
+  }
+
+  function handleAudioError(e, index) {
+    console.error(`Error playing audio file: ${CONFIG.songs[index]?.file || 'voice note'}`, e);
+  }
+
+  /* ---------- NEW 3D Flip Card Gallery Logic ---------- */
+  function startFlipCardGallery() {
+    let photoIndex = 0;
+    const interval = 4500; // Time per photo
+
+    function updateCard(index) {
+      const photo = CONFIG.photos[index];
+      if (!photo) return;
+      
+      // 1. Fade card out
+      galleryCard.classList.remove('active');
+      
+      // 2. After a short delay, update the content
+      setTimeout(() => {
+        galleryImage.src = photo.src;
+        galleryImage.alt = photo.caption;
+        galleryCaption.textContent = photo.caption;
+        
+        // 3. Make sure card is facing front
+        galleryCard.classList.remove('is-flipped');
+        
+        // 4. Fade card back in
+        setTimeout(() => {
+            galleryCard.classList.add('active');
+        }, 100); // Short delay to allow CSS to see change
+        
+      }, 1000); // Wait for fade-out to finish
+    }
+
+    // Click to flip the card
+    galleryCard.parentElement.addEventListener('click', () => {
+      galleryCard.classList.toggle('is-flipped');
+    });
+
+    // Start the slideshow
+    updateCard(photoIndex); // Show first card
+    
+    galleryInterval = setInterval(() => {
+      photoIndex = (photoIndex + 1) % CONFIG.photos.length;
+      updateCard(photoIndex);
+    }, interval);
+  }
+
+  /* ---------- Floating petals, hearts, glow ---------- */
+  function startFloatingParticles() {
+    // Added more cute symbols
+    const symbols = ["💗","💞","🌸","💖","🌹", "✨", "🌱"];
+    function spawnSymbol() {
+      const el = document.createElement('span');
+      el.className = 'float';
+      el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+      el.style.left = Math.random()*100 + "vw";
+      el.style.top = (Math.random()*8 - 8) + "vh";
+      el.style.fontSize = (12 + Math.random()*24) + "px";
+      el.style.opacity = (0.6 + Math.random()*0.4);
+      el.style.transition = "transform 10s linear, opacity 10s linear";
+      document.body.appendChild(el);
+      
+      requestAnimationFrame(()=> {
+          el.style.transform = `translateY(${110 + Math.random()*30}vh) rotate(${Math.random()*720}deg)`;
+      });
+      setTimeout(()=> el.remove(), 10500);
+    }
+    setInterval(spawnSymbol, 330);
+
+    function spawnGlow() {
+      const d = document.createElement('div');
+      d.className = 'glowDot';
+      d.style.left = Math.random()*100 + "vw";
+      d.style.top = Math.random()*100 + "vh";
+      bgDecor.appendChild(d);
+
+      requestAnimationFrame(() => {
+        d.style.opacity = (0.15 + Math.random() * 0.6);
+        setTimeout(() => {
+          d.style.opacity = 0;
+        }, 8000 + Math.random() * 2000);
+      });
+      
+      setTimeout(()=> d.remove(), 11000);
+    }
+    setInterval(spawnGlow, 700);
+  }
+
+  /* ---------- Typewriter (letter) ---------- */
+  function typeWriter(text, speed=28, done) {
+    typedEl.innerHTML = "";
+    let i = 0;
+    (function step(){
+      if (i < text.length) {
+        // Handle newlines
+        if (text.charAt(i) === '\n') {
+          typedEl.innerHTML += '<br>';
+        } else {
+          typedEl.innerHTML += text.charAt(i);
+        }
+        i++;
+        typedEl.scrollTop = typedEl.scrollHeight; // Auto-scroll
+        setTimeout(step, speed + Math.random()*12);
+      } else {
+        typedEl.classList.remove('typing'); // Remove blinking cursor
+        if (typeof done === "function") done();
+      }
+    })();
+  }
+
+  /* ---------- NEW "BEST" Confetti / Hearts Finale ---------- */
+  function burstConfetti() {
+    const canvas = document.createElement('canvas');  
+    canvas.style.position='fixed'; canvas.style.left=0; canvas.style.top=0;  
+    canvas.style.zIndex=9999; canvas.style.pointerEvents='none';
+    document.body.appendChild(canvas); canvas.width = innerWidth; canvas.height = innerHeight;
+    const ctx = canvas.getContext('2d');
+    const pieces = Array.from({length:220}, ()=>({
+      x: Math.random()*canvas.width,
+      y: -Math.random()*canvas.height,
+      vx: (Math.random()-0.5)*6,
+      vy: 2+Math.random()*6,
+      size: 15 + Math.random() * 15, // Made hearts bigger
+      color: `hsl(${Math.random()*60+330}, 80%, 65%)`, // Pinks and reds
+      rot: Math.random()*360
+    }));
+    let t = 0;
+    function frame(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      pieces.forEach(p=>{
+        p.x += p.vx; p.y += p.vy; p.rot += 3;
+        ctx.save();
+        ctx.translate(p.x,p.y);
+        ctx.rotate(p.rot*Math.PI/180);
+        ctx.font = `${p.size}px Arial`; // Use font size for emoji size
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.y < 0 ? 0 : 1; // Fade in at top
+        ctx.fillText('💖', -p.size/2, p.size/2); // Draw a heart emoji
+        ctx.restore();
+      });
+      t++; if(t < 300) requestAnimationFrame(frame); else canvas.remove(); // Lasts longer
+    }
+    frame();
+  }
+
+  /* ---------- PDF download ---------- */
+  downloadPdf.addEventListener('click', ()=>{
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({unit:'pt',format:'letter'});
+      doc.setFontSize(14); doc.setFont("Times","Normal");
+      // Split text to handle page breaks
+      const lines = doc.splitTextToSize(CONFIG.letter, 520);
+      doc.text(lines, 40, 60);
+      doc.save("Happy_Birthday_Letter.pdf");
+    } catch (e) {
+      console.error("jsPDF failed:", e);
+      alert("Error: Could not generate PDF. Please try again.");
+    }
+  });
+
+  /* ---------- Mute toggle ---------- */
+  muteBtn.addEventListener('click', ()=>{
+    isMuted = !isMuted;
+    if (masterGain) {
+      masterGain.gain.value = isMuted ? 0 : 1;
+    }
+    muteBtn.textContent = isMuted ? "Unmute" : "Mute";
+  });
+
+  /* ---------- Play all songs sequentially ---------- */
+  function playSong(index) {
+    if (index >= audioEls.length) {
+      onPlaylistComplete();
+      return;
+    }
+
+    const audioEl = audioEls[index];
+    let hasTriggeredNext = false;
+
+    const onTimeUpdate = () => {
+      if (hasTriggeredNext) return;
+      if (audioEl.duration && (audioEl.duration - audioEl.currentTime) < CROSSFADE_TIME) {
+        hasTriggeredNext = true;
+        audioEl.removeEventListener('timeupdate', onTimeUpdate);
+        playSong(index + 1); // start next
+      }
+    };
+
+    audioEl.onended = () => {
+      audioEl.removeEventListener('timeupdate', onTimeUpdate);
+      if (!hasTriggeredNext) {
+        playSong(index + 1);
+      }
+    };
+
+    audioEl.addEventListener('timeupdate', onTimeUpdate);
+    audioEl.currentTime = 0;
+    audioEl.play().catch((e) => handleAudioError(e, index));
+    crossfadeTo(index, 2.0);
+  }
+
+  /* ---------- After playlist completes ---------- */
+  function onPlaylistComplete(){
+    burstConfetti(); // Run new heart confetti
+    finalOverlay.classList.add('show');
+    finalOverlay.setAttribute('aria-hidden','false');
+  }
+  
+  /* ---------- Final overlay close button ---------- */
+  finalClose.addEventListener('click', ()=> {
+    finalOverlay.classList.remove('show');
+    finalOverlay.setAttribute('aria-hidden','true');
+  });
+
+  /* ---------- Orchestration / Start button ---------- */
+  startBtn.addEventListener('click', async () => {
+    initAudioContext();
+    if (audioCtx && audioCtx.state === 'suspended') {
+      try { await audioCtx.resume(); } catch(e){}
+    }
+
+    // Unlock playback permission
+    for (let i = 0; i < audioEls.length; i++) {
+      try { await audioEls[i].play(); audioEls[i].pause(); audioEls[i].currentTime = 0; }  
+      catch(e){ handleAudioError(e, i); }
+    }
+    if (CONFIG.voiceNote) {
+      try { await voiceEl.play(); voiceEl.pause(); voiceEl.currentTime = 0; }  
+      catch(e){ handleAudioError(e, 'voice'); }
+    }
+
+    // show app & start visuals
+    intro.style.opacity = 0;
+    intro.setAttribute('aria-hidden', 'true');
+    setTimeout(()=> {
+      intro.style.display = 'none';
+      app.classList.remove('hidden');
+      app.setAttribute('aria-hidden', 'false');
+    }, 600);
+
+    // render first photo set & start cycles
+    startFlipCardGallery(); // Start NEW gallery
+    startFloatingParticles();
+
+    // type letter while music plays
+    typeWriter(CONFIG.letter, 28, ()=>{
+      if (CONFIG.voiceNote) {
+        voiceEl.play().catch((e) => handleAudioError(e, 'voice'));
+      }
+    });
+
+    // finally start music chain
+    playSong(0);
+  });
+
+}); // End DOMContentLoaded
+</script>
 </body>
 </html>
