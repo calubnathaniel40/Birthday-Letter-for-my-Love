@@ -1,134 +1,201 @@
-/* ========== BASE ========== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* ---------- BASE / LAYOUT / DREAMY VISUAL STYLES ---------- */
+:root {
+  /* Updated Cute Colors */
+  --color-pink-light: #ffc0d6;
+  --color-pink-bright: #ff85a2;
+  --color-text-light: #ffe6ef;
+  --color-green-light: #b6ffc1;
+  
+  /* Updated Animated Background Colors */
+  --deep-bg-pink: #4d1a36;
+  --deep-bg-green: #1a4d2f;
+  --deep-bg-blue: #1a364d;
+  --deep-bg-purple: #361a4d;
+  
+  --glass: rgba(255, 240, 245, 0.08);
+  --glass-border: rgba(255, 192, 203, 0.18);
+  --shadow-pink: 0 0 25px rgba(255, 182, 193, 0.8);
+  --shadow-green: 0 0 25px rgba(182, 255, 193, 0.8);
 }
-html, body {
-  height: 100%;
-  font-family: "Poppins", sans-serif;
-  overflow-x: hidden;
-  color: #fff;
-  background: radial-gradient(circle at center, #1a0b1f, #000);
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%}
+body{
+  font-family:"Poppins",system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  /* Updated background with new colors */
+  background: radial-gradient(circle at 35% 20%, var(--deep-bg-pink), #000000 40%);
+  color:#fff;
+  -webkit-font-smoothing:antialiased;
+  overflow-y:auto;
+}
+
+/* Intro */
+#intro-screen{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
+  background:linear-gradient(180deg, rgba(0,0,0,0.95), rgba(8,3,10,0.98));z-index:120;padding:20px;text-align:center;
+}
+#intro-screen h1{font-family:"Great Vibes",cursive;font-size:2.7rem;color:var(--color-pink-light);text-shadow:0 6px 30px rgba(255,120,160,0.18)}
+#intro-screen .sub{color:rgba(255,220,235,0.9)}
+#start-btn{
+  background:linear-gradient(45deg, var(--color-pink-bright), var(--color-pink-light));
+  border:none;color:#fff;padding:12px 30px;border-radius:28px;font-weight:600;cursor:pointer;
+  /* Changed shadow to green for contrast */
+  box-shadow: 0 0 30px rgba(182, 255, 193, 0.6);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+#start-btn:hover, #start-btn:focus{
+  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(182, 255, 193, 0.9);
+}
+#start-btn:active{transform:scale(.995)}
+
+/* App layout */
+.hidden{display:none}
+#app{min-height:100vh;padding:20px 16px 90px;max-width:1100px;margin:0 auto;position:relative;z-index:2}
+.hero{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.title{font-family:"Great Vibes",cursive;font-size:2.1rem;color:#ffd1dc;margin:10px 0 18px;text-shadow:0 0 12px var(--color-pink-bright)}
+.controls{display:flex;gap:8px}
+.btn-small{background:#ffe6ee;border:none;padding:8px 10px;color:#5a1a2a;border-radius:10px;cursor:pointer}
+
+/* background decor + NEW multi-color animation */
+#bg-decor{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background: radial-gradient(circle at center, var(--deep-bg-pink), #000);
   animation: bgShift 30s ease-in-out infinite alternate;
 }
 @keyframes bgShift {
-  0% { background: radial-gradient(circle at center, #2b0f1a, #000); }
-  25% { background: radial-gradient(circle at center, #1a0f2b, #000); }
-  50% { background: radial-gradient(circle at center, #0f1a2b, #000); }
-  75% { background: radial-gradient(circle at center, #2b1a0f, #000); }
-  100% { background: radial-gradient(circle at center, #1a0b1f, #000); }
+  0% { background: radial-gradient(circle at center, var(--deep-bg-pink), #000); }
+  25% { background: radial-gradient(circle at center, var(--deep-bg-green), #000); }
+  50% { background: radial-gradient(circle at center, var(--deep-bg-blue), #000); }
+  75% { background: radial-gradient(circle at center, var(--deep-bg-purple), #000); }
+  100% { background: radial-gradient(circle at center, var(--deep-bg-pink), #000); }
 }
 
-/* ========== INTRO SCREEN ========== */
-#intro-screen {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.95);
+
+/* --- NEW 3D FLIP CARD GALLERY --- */
+.gallery-wrap {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  z-index: 20;
-  transition: opacity 1.5s ease;
+  gap: 12px;
+  margin-bottom: 20px;
+  z-index: 3;
 }
-#intro-screen.fade-out { opacity: 0; pointer-events: none; }
-#intro-screen h1 {
-  font-family: "Great Vibes", cursive;
-  font-size: 3rem;
-  color: #ffc0cb;
-  text-shadow: 0 0 20px #ffb6c1;
-  margin-bottom: 0.5em;
-}
-#start-btn {
-  margin-top: 1.5em;
-  padding: 12px 24px;
-  font-size: 1.2rem;
-  background: linear-gradient(135deg, #ff85a2, #ffb6c1);
-  border: none;
-  border-radius: 50px;
-  color: #fff;
+
+/* This container sets the 3D perspective */
+.flip-card-container {
+  width: 300px;
+  height: 380px;
+  perspective: 1000px;
   cursor: pointer;
-  box-shadow: 0 0 20px rgba(255,182,193,0.6);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-#start-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 30px rgba(255,182,193,0.9);
 }
 
-/* ========== MAIN CONTENT ========== */
-#app {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem;
-  text-align: center;
+/* This is the card that will flip */
+.flip-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 1s ease, opacity 1.5s ease;
+  transform-style: preserve-3d;
+  opacity: 0.3; /* Start faded out */
 }
 
-h2 {
-  font-family: "Great Vibes", cursive;
-  font-size: 2.5rem;
-  color: #ffd1dc;
-  text-shadow: 0 0 15px #ff85a2;
-  margin-bottom: 1em;
+/* This class is toggled by JS to flip */
+.flip-card.is-flipped {
+  transform: rotateY(180deg);
 }
-
-/* ========== GALLERY ========== */
-.gallery {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 40px;
-}
-.photo {
-  width: 180px;
-  height: 220px;
-  border-radius: 15px;
-  object-fit: cover;
-  opacity: 0.3;
-  transition: all 1.5s ease;
-  box-shadow: 0 0 10px rgba(255, 192, 203, 0.3);
-}
-.photo.active {
+/* This class is added by JS to show the card */
+.flip-card.active {
   opacity: 1;
   transform: scale(1.05);
-  box-shadow: 0 0 25px rgba(255, 182, 193, 0.8);
 }
 
-/* ========== LETTER ========== */
-#typed-text {
-  background: rgba(255,240,245,0.1);
-  border: 2px solid rgba(255,192,203,0.3);
+/* Common styles for front and back */
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden; /* Hides the side facing away */
   border-radius: 20px;
-  padding: 40px;
-  max-width: 750px;
-  font-family: "Great Vibes", cursive;
-  font-size: 1.6rem;
-  color: #ffe4ec;
-  text-align: left;
-  line-height: 1.8;
-  box-shadow: 0 0 20px rgba(255,182,193,0.3);
-  backdrop-filter: blur(8px);
-  overflow-y: auto;
-  max-height: 80vh;
-  animation: fadeIn 2s ease;
-}
-@keyframes fadeIn {
-  from {opacity: 0; transform: translateY(30px);}
-  to {opacity: 1; transform: translateY(0);}
+  
+  /* Dreamy glass effect */
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
-/* ========== FLOATING PETALS/HEARTS ========== */
-.float {
-  position: fixed;
-  font-size: 18px;
-  opacity: 0.7;
-  animation: float 8s linear infinite;
-  z-index: 5;
+/* Front of the card (Photo) */
+.flip-card-front {
+  box-shadow: var(--shadow-green);
 }
-@keyframes float {
-  0% { transform: translateY(100vh) rotate(0deg); opacity: 1;}
-  100% { transform: translateY(-100vh) rotate(360deg); opacity: 0;}
+.flip-card-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 1s ease;
+}
+
+/* Back of the card (Caption) */
+.flip-card-back {
+  transform: rotateY(180deg);
+  box-shadow: var(--shadow-pink);
+  padding: 20px;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: var(--color-text-light);
+}
+/* --- END OF 3D FLIP CARD GALLERY --- */
+
+
+/* letter */
+#letterBox{display:block;width:100%;max-width:860px;margin:16px auto 20px;position:relative;z-index:4}
+#typed{background:var(--glass);border-radius:18px;padding:28px;font-family:"Great Vibes",cursive;font-size:1.35rem;line-height:1.7;color:var(--color-text-light);box-shadow:0 18px 60px rgba(0,0,0,0.6);backdrop-filter: blur(6px);max-height:60vh;overflow:auto;border:1px solid var(--glass-border)}
+#typed.typing::after {
+  content: '...'; /* Blinking cursor */
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* final overlay */
+#finalOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(180deg, rgba(10,2,8,0.6), rgba(0,0,0,0.9));z-index:400;opacity:0;pointer-events:none;transition:opacity 1s ease}
+#finalOverlay.show{opacity:1;pointer-events:auto}
+#finalOverlay h1{font-family:"Great Vibes",cursive;font-size:2.8rem;color:#ffd1dc;margin-bottom:10px}
+#finalOverlay p{color:#ffe7ef;margin-bottom:16px;text-align:center;max-width:90%}
+
+/* floating/choreography helpers */
+.float{position:fixed;pointer-events:none;user-select:none;z-index:150; font-size: 18px;}
+.glowDot{
+  position:fixed;width:10px;height:10px;border-radius:50%;
+  /* Animate the glow dots to change color */
+  animation: colorGlow 10s infinite alternate;
+  filter:blur(6px);z-index:50;pointer-events:none;
+}
+@keyframes colorGlow {
+  0% { background: rgba(255,182,193,.45); }
+  50% { background: rgba(182, 255, 193, 0.45); }
+  100% { background: rgba(182, 193, 255, 0.45); }
+}
+
+/* audio elements hidden */
+audio{display:none}
+
+/* responsiveness */
+@media(min-width:760px){ 
+  #typed{font-size:1.65rem} 
+}
+@media(max-width:420px){ 
+  .title{font-size:1.9rem} 
+  #typed{font-size:1.05rem;max-height:65vh} 
+  .flip-card-container { width: 280px; height: 360px; }
 }
