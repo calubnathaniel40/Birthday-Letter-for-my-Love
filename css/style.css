@@ -22,7 +22,6 @@
 html,body{height:100%;width:100%}
 body{
   font-family:"Poppins",system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  /* Updated background with new colors */
   background: radial-gradient(circle at 35% 20%, var(--deep-bg-pink), #000000 40%);
   color:#fff;
   -webkit-font-smoothing:antialiased;
@@ -39,7 +38,6 @@ body{
 #start-btn{
   background:linear-gradient(45deg, var(--color-pink-bright), var(--color-pink-light));
   border:none;color:#fff;padding:12px 30px;border-radius:28px;font-weight:600;cursor:pointer;
-  /* Changed shadow to green for contrast */
   box-shadow: 0 0 30px rgba(182, 255, 193, 0.6);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -51,11 +49,30 @@ body{
 
 /* App layout */
 .hidden{display:none}
-#app{min-height:100vh;padding:20px 16px 90px;max-width:1100px;margin:0 auto;position:relative;z-index:2}
-.hero{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+#app{
+  min-height:100vh;padding:20px 16px 90px;
+  max-width:1100px;margin:0 auto;position:relative;z-index:2;
+  /* --- NEW: Ensure centering --- */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hero{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;
+  /* --- NEW: Ensure hero stretches --- */
+  width: 100%;
+  max-width: 860px; /* Match letterbox max-width */
+}
 .title{font-family:"Great Vibes",cursive;font-size:2.1rem;color:#ffd1dc;margin:10px 0 18px;text-shadow:0 0 12px var(--color-pink-bright)}
 .controls{display:flex;gap:8px}
-.btn-small{background:#ffe6ee;border:none;padding:8px 10px;color:#5a1a2a;border-radius:10px;cursor:pointer}
+.btn-small{
+  background:#ffe6ee;border:none;padding:8px 10px;color:#5a1a2a;border-radius:10px;cursor:pointer;
+  /* --- NEW: Add nice transition --- */
+  transition: background 0.2s ease;
+}
+.btn-small:hover {
+  background: #ffd9e6;
+}
 
 /* background decor + NEW multi-color animation */
 #bg-decor{
@@ -84,7 +101,9 @@ body{
 
 /* This container sets the 3D perspective */
 .flip-card-container {
-  width: 300px;
+  /* --- CHANGED: Make responsive --- */
+  width: 90vw;
+  max-width: 300px;
   height: 380px;
   perspective: 1000px;
   cursor: pointer;
@@ -157,8 +176,18 @@ body{
 
 
 /* letter */
-#letterBox{display:block;width:100%;max-width:860px;margin:16px auto 20px;position:relative;z-index:4}
-#typed{background:var(--glass);border-radius:18px;padding:28px;font-family:"Great Vibes",cursive;font-size:1.35rem;line-height:1.7;color:var(--color-text-light);box-shadow:0 18px 60px rgba(0,0,0,0.6);backdrop-filter: blur(6px);max-height:60vh;overflow:auto;border:1px solid var(--glass-border)}
+#letterBox{
+  display:block;
+  /* --- CHANGED: Make responsive --- */
+  width: 95vw;
+  max-width:860px;
+  margin:16px auto 20px;position:relative;z-index:4
+}
+#typed{
+  background:var(--glass);border-radius:18px;padding:28px;font-family:"Great Vibes",cursive;font-size:1.35rem;line-height:1.7;color:var(--color-text-light);box-shadow:0 18px 60px rgba(0,0,0,0.6);backdrop-filter: blur(6px);max-height:60vh;overflow:auto;border:1px solid var(--glass-border);
+  /* --- NEW: Make scrolling smooth --- */
+  scroll-behavior: smooth;
+}
 #typed.typing::after {
   content: '...'; /* Blinking cursor */
   animation: blink 1s step-end infinite;
@@ -174,10 +203,15 @@ body{
 #finalOverlay p{color:#ffe7ef;margin-bottom:16px;text-align:center;max-width:90%}
 
 /* floating/choreography helpers */
-.float{position:fixed;pointer-events:none;user-select:none;z-index:150; font-size: 18px;}
+.float{
+  position:fixed;pointer-events:none;user-select:none;z-index:150;
+  /* --- CHANGED: Increased base size --- */
+  font-size: 22px;
+  /* --- NEW: Add shadow to pop --- */
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
 .glowDot{
   position:fixed;width:10px;height:10px;border-radius:50%;
-  /* Animate the glow dots to change color */
   animation: colorGlow 10s infinite alternate;
   filter:blur(6px);z-index:50;pointer-events:none;
 }
@@ -197,5 +231,5 @@ audio{display:none}
 @media(max-width:420px){ 
   .title{font-size:1.9rem} 
   #typed{font-size:1.05rem;max-height:65vh} 
-  .flip-card-container { width: 280px; height: 360px; }
+  .flip-card-container { width: 90vw; max-width: 280px; height: 360px; }
 }
