@@ -3,6 +3,7 @@
 const CONFIG = {
   // --- NEW: Formatted letter slides with Libra sign and new date ---
   letter: [
+    { type: 'libra', text: '♎' },
     { type: 'date', text: 'October 31, 2025' },
     { type: 'salutation', text: 'Dear, Daniele Loise T. Guerta,' },
     { type: 'body', text: 'Happy birthday, my babyyy. I hope today fills your heart with peace, joy, and warmth because that’s exactly what you give to me every single day. I want this letter to be something you can come back to whenever you need to feel loved, safe, and reminded of how special you are not just to me, but to everyone who’s lucky enough to know you.' },
@@ -12,7 +13,7 @@ const CONFIG = {
     { type: 'body', text: 'As I write this, I can’t help but think about how much you’ve grown and how proud I am of you. You’ve gone through challenges, but you never gave up. You stayed strong, even when life tried to test you. You inspire me in ways you might not even realize. You have a kind heart, a brave soul, and a beautiful mind. You deserve every good thing that life has to offer.' },
     { type: 'body', text: 'On your birthday, I want to wish you everything your heart desires. I wish you happiness that lasts, dreams that come true, and peace that stays within you no matter what happens. I hope every prayer you whisper is heard and answered in the best way possible. You deserve a life full of love, success, and calm moments where you can finally breathe and say, “I made it.”' },
     { type: 'body', text: 'I know life will not always be easy. There will be days when things feel heavy and the world feels unfair. But I want you to remember that you are not alone. You are strong enough to get through anything, and I will always be right here to remind you of that. I’ll be beside you through every storm, holding your hand and reminding you that better days are always ahead.' },
-    { type: 'body', text: 'You’ve shown me what love really means. It’s not just about saying “I love you,” it’s about showing up, being patient, and growing together. We’ve had our ups and downs, and that’s what makes what we have real. It’s not perfect, but it’s ours. You’ve taught me that love is not about never having problems; it’s about choosing each other again and again, even when it’s not easy.' },
+    { type: 'body', text: 'You’ve shown me what love really means. It’s not just about saying “I love you,” it’s aboutshowing up, being patient, and growing together. We’ve had our ups and downs, and that’s what makes what we have real. It’s not perfect, but it’s ours. You’ve taught me that love is not about never having problems; it’s about choosing each other again and again, even when it’s not easy.' },
     { type: 'body', text: 'I want you to know how proud I am of you. The way you care for others, the way you stay kind, the way you keep moving forward... all of that shows how beautiful your heart truly is. You have this quiet strength that makes people around you feel safe. You have this warmth that makes any place feel like home.' },
     { type: 'body', text: 'I pray that life gives you endless reasons to smile. I hope that your dreams come true. I hope you keep believing in yourself, even when things don’t go as planned. You have so much potential, and I know you’ll achieve beautiful things one day.' },
     { type: 'body', text: 'I want you to remember something, my love: you don’t have to have everything figured out right now. You don’t have to be perfect. It’s okay to rest, it’s okay to cry, it’s okay to ask for help. And when the world feels too much, I hope you always remember that you have me. You have someone who believes in you endlessly. You have someone who will always choose you, no matter how hard life gets.' },
@@ -104,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     audioEl.play().catch((e) => handleAudioError(e, index));
   }
 
-  /* --- NEW: Constellation Background w/ Libra & Shooting Stars --- */
+  /* --- NEW: Constellation Background w/ Accurate Libra & Shooting Stars --- */
   function initConstellation() {
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -114,25 +115,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let width, height, particles, twinklingStars, shootingStars;
     
     // --- NEW: Accurate coordinates for Libra constellation ---
-    // (Normalized 0-1) based on the image you provided
+    // (Normalized 0-1) based on your provided image
     const libraStars = [
-        { x: 0.0, y: 0.5 },  // Zubenelgenubi (Alpha Librae)
-        { x: 0.1, y: 0.1 },  // Zubeneschamali (Beta Librae)
-        { x: 0.3, y: 0.6 },  // Zubenelhakrabi (Gamma Librae)
-        { x: 0.6, y: 0.7 },  // Brachium (Sigma Librae)
-        { x: 1.0, y: 0.65 }, // Upsilon Librae
-        { x: 0.9, y: 0.0 },  // Tau Librae
+        { x: 0.18, y: 0.50 }, // Left-most star (Brachium)
+        { x: 0.35, y: 0.35 }, // Upper-left star
+        { x: 0.48, y: 0.05 }, // Top-most star (Zubeneschamali)
+        { x: 0.78, y: 0.30 }, // Right star
+        { x: 0.70, y: 0.65 }, // Lower-right star
+        { x: 0.50, y: 0.95 }, // Bottom-most star (Zubenelgenubi)
+        { x: 0.55, y: 0.80 }  // Star between bottom and lower-right
     ];
-    // Lines connecting the stars by their index
+    // Lines connecting the stars by their index (0-based)
     const libraLines = [
-        [0, 1], [0, 2], [1, 5], [2, 3], [3, 4], [4, 5]
+        [0, 1], [1, 2], [2, 3], [3, 4], [4, 6], [6, 5], [2, 6]
     ];
 
     function resize() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
       
-      particles = Array.from({length: 80}, () => ({ // Reduced particle count
+      particles = Array.from({length: 80}, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
         vx: Math.random() * 0.2 - 0.1,
@@ -180,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // --- NEW: Draw Libra Constellation ---
       const constellationWidth = Math.min(width * 0.5, 300); // Max 300px wide
-      const constellationHeight = constellationWidth * 0.8;
+      const constellationHeight = constellationWidth; // Make it square-ish
       const offsetX = (width - constellationWidth) / 2;
       const offsetY = height * 0.15;
 
@@ -193,9 +195,11 @@ document.addEventListener('DOMContentLoaded', () => {
           y: s.y * constellationHeight + offsetY
       }));
 
-      starPoints.forEach(p => {
+      starPoints.forEach((p, i) => {
           ctx.beginPath();
-          ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2); // Make Libra stars bigger
+          // Make main stars brighter
+          const radius = [0, 2, 5].includes(i) ? 3.5 : 2.5; 
+          ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
           ctx.fill();
       });
 
@@ -218,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       // --- NEW: Draw Shooting Stars (More Frequent) ---
-      if (Math.random() > 0.985 && shootingStars.length < 5) { // Spawn more
+      if (Math.random() > 0.97 && shootingStars.length < 5) { // Spawn more
         shootingStars.push({
           x: Math.random() * width, y: Math.random() * 100,
           len: 150 + Math.random() * 150, // Longer tails
@@ -489,4 +493,3 @@ document.addEventListener('DOMContentLoaded', () => {
   // By default, body is scrollable so intro works.
 
 }); // End DOMContentLoaded
-
