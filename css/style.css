@@ -3,11 +3,13 @@
   --color-pink-light: #ffc0d6;
   --color-pink-bright: #ff85a2;
   --color-text-light: #ffe6ef;
-  --color-green-light: #b6ffc1;
   
-  --deep-bg-pink: #4d1a36;
-  --deep-bg-blue: #1a364d;
-  
+  /* NEW: Dreamy Sky Colors */
+  --deep-bg-1: #1a0215;
+  --deep-bg-2: #0b021a;
+  --nebula-1: #4d1a36;
+  --nebula-2: #1a364d;
+
   --glass: rgba(255, 240, 245, 0.1);
   --glass-border: rgba(255, 192, 203, 0.2);
   --shadow-pink: 0 0 25px rgba(255, 182, 193, 0.8);
@@ -24,12 +26,11 @@ body{
   background: #000;
   color:#fff;
   -webkit-font-smoothing:antialiased;
-  /* CRITICAL BUG FIX: This line is removed. */
-  /* 'overflow: hidden' is now set by JS *after* the start button is clicked. */
-  /* This ensures the intro screen is clickable. */
-  overflow-y: auto;
+  /* CRITICAL BUG FIX: This is now set by JS *after* start is clicked. */
+  overflow-y: auto; /* Allow intro screen to be interactive */
 }
 
+/* --- NEW: Dreamy Color-Changing Background --- */
 #constellation-bg {
   position: fixed;
   top: 0;
@@ -37,8 +38,18 @@ body{
   width: 100%;
   height: 100%;
   z-index: 0;
-  background: radial-gradient(circle at 35% 20%, var(--deep-bg-pink), #070204 60%);
+  background: radial-gradient(circle at 35% 20%, var(--nebula-1), var(--deep-bg-1) 60%);
+  animation: bgShift 30s ease-in-out infinite alternate;
 }
+@keyframes bgShift {
+  0% {
+    background: radial-gradient(circle at 35% 20%, var(--nebula-1), var(--deep-bg-1) 60%);
+  }
+  100% {
+    background: radial-gradient(circle at 65% 80%, var(--nebula-2), var(--deep-bg-2) 60%);
+  }
+}
+
 
 #intro-screen{
   position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
@@ -75,7 +86,6 @@ body{
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  perspective: 2px; /* For parallax scrolling */
 }
 #app.loaded {
   opacity: 1;
@@ -135,7 +145,7 @@ body{
 }
 
 
-/* --- NEW: Fade & SLIDE Gallery (No Zoom) --- */
+/* --- FIXED: Fade & SLIDE Gallery (No Zoom) --- */
 .gallery-section {
   width: 100%;
   padding: 80px 0;
