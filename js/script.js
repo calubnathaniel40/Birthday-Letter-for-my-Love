@@ -3,7 +3,6 @@
 const CONFIG = {
   // --- NEW: Formatted letter slides with Libra sign and new date ---
   letter: [
-    { type: 'libra', text: '♎' },
     { type: 'date', text: 'October 31, 2025' },
     { type: 'salutation', text: 'Dear, Daniele Loise T. Guerta,' },
     { type: 'body', text: 'Happy birthday, my babyyy. I hope today fills your heart with peace, joy, and warmth because that’s exactly what you give to me every single day. I want this letter to be something you can come back to whenever you need to feel loved, safe, and reminded of how special you are not just to me, but to everyone who’s lucky enough to know you.' },
@@ -114,21 +113,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     let width, height, particles, twinklingStars, shootingStars;
     
-    // --- NEW: Coordinates for Libra constellation ---
-    // Normalized (0-1) coordinates, simple representation
+    // --- NEW: Accurate coordinates for Libra constellation ---
+    // (Normalized 0-1)
     const libraStars = [
-        [0.1, 0.4], [0.2, 0.5], [0.4, 0.6], [0.5, 0.4], 
-        [0.8, 0.2], [0.9, 0.3], [0.4, 0.6], [0.2, 0.7] 
+        { x: 0.0, y: 0.5 },  // Zubenelgenubi (Alpha)
+        { x: 0.1, y: 0.1 },  // Zubeneschamali (Beta)
+        { x: 0.3, y: 0.6 },  // Zubenelhakrabi (Gamma)
+        { x: 0.6, y: 0.7 },  // Brachium (Sigma)
+        { x: 1.0, y: 0.65 }, // Upsilon Librae
+        { x: 0.9, y: 0.0 },  // Tau Librae
+        { x: 0.3, y: 0.6 },  // Duplicate Gamma for line
+        { x: 0.1, y: 0.1 }   // Duplicate Beta for line
     ];
     const libraLines = [
-        [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [2, 6], [1, 7]
+        [0, 1], [0, 2], [1, 5], [2, 3], [3, 4], [3, 6], [4, 5]
     ];
 
     function resize() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
       
-      particles = Array.from({length: 80}, () => ({ // Reduced particle count
+      particles = Array.from({length: 80}, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
         vx: Math.random() * 0.2 - 0.1,
@@ -136,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         radius: 1 + Math.random() * 1
       }));
 
-      twinklingStars = Array.from({length: 20}, () => ({ // Twinkling stars
+      twinklingStars = Array.from({length: 30}, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
         radius: Math.random() * 1.5,
@@ -174,18 +179,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // --- NEW: Draw Libra Constellation ---
-      const constellationWidth = width * 0.4;
-      const constellationHeight = height * 0.4;
-      const offsetX = width * 0.3;
-      const offsetY = height * 0.2;
+      const constellationWidth = Math.min(width * 0.5, 300); // Max 300px wide
+      const constellationHeight = constellationWidth * 0.8;
+      const offsetX = (width - constellationWidth) / 2;
+      const offsetY = height * 0.15;
 
       ctx.fillStyle = 'rgba(255, 255, 255, 1)';
       ctx.strokeStyle = 'rgba(255, 219, 230, 0.5)';
       ctx.lineWidth = 1;
       
       const starPoints = libraStars.map(s => ({
-          x: s[0] * constellationWidth + offsetX,
-          y: s[1] * constellationHeight + offsetY
+          x: s.x * constellationWidth + offsetX,
+          y: s.y * constellationHeight + offsetY
       }));
 
       starPoints.forEach(p => {
@@ -213,11 +218,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       // --- NEW: Draw Shooting Stars (More Frequent) ---
-      if (Math.random() > 0.985 && shootingStars.length < 5) { // Spawn more
+      if (Math.random() > 0.97 && shootingStars.length < 5) { // Spawn more
         shootingStars.push({
           x: Math.random() * width, y: Math.random() * 100,
-          len: 100 + Math.random() * 100,
-          vx: 5 + Math.random() * 5, vy: 3 + Math.random() * 3,
+          len: 150 + Math.random() * 150, // Longer tails
+          vx: 7 + Math.random() * 7, // Faster
+          vy: 4 + Math.random() * 4, // Faster
           life: 1.0,
         });
       }
