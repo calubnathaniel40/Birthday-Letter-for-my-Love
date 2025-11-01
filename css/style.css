@@ -11,19 +11,22 @@
   --glass: rgba(255, 240, 245, 0.08);
   --glass-border: rgba(255, 192, 203, 0.18);
   --shadow-pink: 0 0 25px rgba(255, 182, 193, 0.8);
+
+  /* Fonts */
+  --font-formal: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --font-script: "Great Vibes", cursive;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
 
-/* We need to allow the body to scroll */
 body{
-  font-family:"Poppins",system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background: #000; /* Fallback */
+  font-family: var(--font-formal);
+  background: #000;
   color:#fff;
   -webkit-font-smoothing:antialiased;
+  overflow-y: hidden; /* Scrolling is handled by #app */
 }
 
-/* --- NEW: Canvas Background --- */
 #constellation-bg {
   position: fixed;
   top: 0;
@@ -34,12 +37,11 @@ body{
   background: radial-gradient(circle at 35% 20%, var(--deep-bg-pink), #070204 60%);
 }
 
-/* --- Intro Screen (Unchanged) --- */
 #intro-screen{
   position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
   background:linear-gradient(180deg, rgba(0,0,0,0.95), rgba(8,3,10,0.98));z-index:120;padding:20px;text-align:center;
 }
-#intro-screen h1{font-family:"Great Vibes",cursive;font-size:2.7rem;color:var(--color-pink-light);text-shadow:0 6px 30px rgba(255,120,160,0.18)}
+#intro-screen h1{font-family: var(--font-script);font-size:2.7rem;color:var(--color-pink-light);text-shadow:0 6px 30px rgba(255,120,160,0.18)}
 #intro-screen .sub{color:rgba(255,220,235,0.9)}
 #start-btn{
   background:linear-gradient(45deg, var(--color-pink-bright), var(--color-pink-light));
@@ -52,23 +54,33 @@ body{
   box-shadow: 0 0 40px rgba(182, 255, 193, 0.9);
 }
 
-/* --- App layout --- */
+/* App layout */
 .hidden{display:none}
 #app{
-  padding: 20px 0 90px; /* No horizontal padding, let content decide */
+  padding: 20px 0 90px;
   max-width:1100px;
   margin:0 auto;
   position:relative;
   z-index:2;
-  /* Add a fade-in for the whole app */
   opacity: 0;
   transition: opacity 1s ease-in;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* This is the magic for parallax */
+  perspective: 1px;
 }
 #app.loaded {
   opacity: 1;
 }
+#app::-webkit-scrollbar { 
+  display: none;
+}
 
-/* --- CHANGED: Hero is now sticky --- */
+/* Hero (sticky header) */
 .hero{
   display:flex;align-items:center;justify-content:space-between;
   gap:12px;
@@ -76,18 +88,14 @@ body{
   width: 100%;
   max-width: 860px;
   padding: 10px 16px;
-  
-  /* Sticky header */
   position: sticky;
   top: 0;
   z-index: 100;
-
-  /* Glass effect for header */
   background: rgba(10, 2, 8, 0.7);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--glass-border);
 }
-.title{font-family:"Great Vibes",cursive;font-size:2.1rem;color:#ffd1dc;margin:0; text-shadow:0 0 12px var(--color-pink-bright)}
+.title{font-family: var(--font-script);font-size:2.1rem;color:#ffd1dc;margin:0; text-shadow:0 0 12px var(--color-pink-bright)}
 .controls{display:flex;gap:8px}
 .btn-small{
   background:#ffe6ee;border:none;padding:8px 10px;color:#5a1a2a;border-radius:10px;cursor:pointer;
@@ -97,13 +105,15 @@ body{
   background: #ffd9e6;
 }
 
-/* --- NEW: Scroll Prompt --- */
+/* Scroll Prompt */
 .scroll-prompt {
   text-align: center;
   margin: 60px 0 100px;
   color: var(--color-pink-light);
   opacity: 0;
   animation: fadeIn 2s 1s forwards;
+  position: relative;
+  z-index: 5; /* Ensure it's above parallax items */
 }
 .scroll-prompt span {
   display: block;
@@ -121,103 +131,115 @@ body{
 }
 
 
-/* --- NEW: Gallery Carousel --- */
+/* --- NEW: Parallax & Fade-in Gallery --- */
 .gallery-section {
   width: 100%;
   padding: 80px 0;
   margin-bottom: 80px;
-  /* Add a glass background to the whole section */
-  background: var(--glass);
-  border-top: 1px solid var(--glass-border);
-  border-bottom: 1px solid var(--glass-border);
-  backdrop-filter: blur(5px);
   position: relative;
   z-index: 5;
-}
-.gallery-carousel {
   display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory; /* This is the magic for carousels */
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  padding: 20px 0;
-  gap: 20px;
-}
-/* This pseudo-element adds padding to the start/end for snapping */
-.gallery-carousel::before,
-.gallery-carousel::after {
-  content: '';
-  display: block;
-  width: calc(50% - 150px); /* Adjust to center the first/last item */
+  flex-direction: column;
+  align-items: center;
+  gap: 120px;
 }
 .carousel-item {
   flex-shrink: 0;
-  width: 300px;
-  height: 380px;
-  scroll-snap-align: center; /* This snaps the item to the center */
+  width: 90vw;
+  max-width: 400px;
+  height: auto;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 10px 40px rgba(0,0,0,0.5);
   border: 1px solid var(--glass-border);
-  transition: transform 0.5s ease, opacity 0.5s ease;
+  
+  /* Parallax: start scaled down */
+  transform: translateZ(-0.5px) scale(1.5);
+  
+  /* Fade-in: start faded out */
+  opacity: 0.2;
+  transition: opacity 0.6s ease-out;
+}
+.carousel-item.is-visible {
+  opacity: 1;
 }
 .carousel-item img {
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: cover;
   display: block;
 }
-/* Add a hover effect */
-.carousel-item:hover {
-  transform: scale(1.03);
-}
 
-/* --- NEW: Scroll-Reveal Letter --- */
+/* --- NEW: Scroll-Reveal Letter Slides --- */
 #letterBox{
   display:block;
   width: 100%;
   max-width:860px;
   margin: 80px auto 20px;
-  padding: 0 20px; /* Add horizontal padding back */
+  padding: 0 20px;
   position:relative;
-  z-index: 4;
+  z-index: 5; /* Above parallax */
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem; /* Space between paragraphs */
 }
-#letter-text {
-  font-family:"Great Vibes",cursive;
-  font-size:1.65rem;
-  line-height:1.8;
-  color: var(--color-text-light);
+
+/* This is the "before" state for each slide */
+.letter-slide {
+  opacity: 0.1;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
-/* This is the key: all characters start faded */
-.letter-char {
-  opacity: 0.15;
-  transition: opacity 0.2s ease-in-out;
-}
-/* When JS adds this class, the character becomes visible */
-.letter-char.revealed {
+/* This is the "after" (visible) state */
+.letter-slide.is-visible {
   opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- NEW: Formal Letter Typography --- */
+.letter-slide.date {
+  font-family: var(--font-formal);
+  font-style: italic;
+  color: var(--color-pink-light);
+  font-size: 1rem;
+}
+.letter-slide.salutation {
+  font-family: var(--font-script);
+  font-size: 2.2rem;
   color: #fff;
   text-shadow: 0 0 10px var(--color-pink-light);
+  margin-bottom: 1rem;
 }
-/* Make line breaks work */
-.letter-char.newline {
-  display: block;
+.letter-slide.body {
+  font-family: var(--font-formal);
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--color-text-light);
+}
+.letter-slide.closing {
+  font-family: var(--font-script);
+  font-size: 2.2rem;
+  color: #fff;
+  text-shadow: 0 0 10px var(--color-pink-light);
+  margin-top: 1rem;
 }
 
 
-/* --- Final Overlay (Unchanged) --- */
-#finalOverlay{position:fixed;inset:0;display:flex;align:items;center;justify-content:center;flex-direction:column;background:linear-gradient(180deg, rgba(10,2,8,0.6), rgba(0,0,0,0.9));z-index:400;opacity:0;pointer-events:none;transition:opacity 1s ease}
+/* --- Final Overlay --- */
+#finalOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(180deg, rgba(10,2,8,0.6), rgba(0,0,0,0.9));z-index:400;opacity:0;pointer-events:none;transition:opacity 1s ease}
 #finalOverlay.show{opacity:1;pointer-events:auto}
-#finalOverlay h1{font-family:"Great Vibes",cursive;font-size:2.8rem;color:#ffd1dc;margin-bottom:10px}
+#finalOverlay h1{font-family: var(--font-script);font-size:2.8rem;color:#ffd1dc;margin-bottom:10px}
 #finalOverlay p{color:#ffe7ef;margin-bottom:16px;text-align:center;max-width:90%}
 
-/* --- audio elements hidden --- */
 audio{display:none}
 
-/* --- responsiveness --- */
 @media(max-width: 420px){ 
-  .title{font-size:1.9rem} 
-  #letter-text{font-size:1.35rem; line-height: 1.7;}
-  .carousel-item { width: 260px; height: 340px; }
-  .gallery-carousel::before,
-  .gallery-carousel::after { width: calc(50% - 130px); }
+  .title{font-size:1.9rem}
+  .carousel-item { width: 90vw; max-width: 300px; }
+  .gallery-section { gap: 80px; }
+
+  .letter-slide.date { font-size: 0.9rem; }
+  .letter-slide.salutation { font-size: 1.9rem; }
+  .letter-slide.body { font-size: 1rem; line-height: 1.7; }
+  .letter-slide.closing { font-size: 1.9rem; }
 }
