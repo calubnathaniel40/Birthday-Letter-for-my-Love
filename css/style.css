@@ -1,34 +1,40 @@
-/* ---------- BASE / LAYOUT / DREAMY VISUAL STYLES ---------- */
+/* ---------- BASE / LAYOUT / PROFESSIONAL STYLES ---------- */
 :root {
-  /* Updated Cute Colors */
   --color-pink-light: #ffc0d6;
   --color-pink-bright: #ff85a2;
   --color-text-light: #ffe6ef;
   --color-green-light: #b6ffc1;
   
-  /* Updated Animated Background Colors */
   --deep-bg-pink: #4d1a36;
-  --deep-bg-green: #1a4d2f;
   --deep-bg-blue: #1a364d;
-  --deep-bg-purple: #361a4d;
   
   --glass: rgba(255, 240, 245, 0.08);
   --glass-border: rgba(255, 192, 203, 0.18);
   --shadow-pink: 0 0 25px rgba(255, 182, 193, 0.8);
-  --shadow-green: 0 0 25px rgba(182, 255, 193, 0.8);
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;width:100%}
+
+/* We need to allow the body to scroll */
 body{
   font-family:"Poppins",system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background: radial-gradient(circle at 35% 20%, var(--deep-bg-pink), #000000 40%);
+  background: #000; /* Fallback */
   color:#fff;
   -webkit-font-smoothing:antialiased;
-  overflow-y:auto;
 }
 
-/* Intro */
+/* --- NEW: Canvas Background --- */
+#constellation-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background: radial-gradient(circle at 35% 20%, var(--deep-bg-pink), #070204 60%);
+}
+
+/* --- Intro Screen (Unchanged) --- */
 #intro-screen{
   position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
   background:linear-gradient(180deg, rgba(0,0,0,0.95), rgba(8,3,10,0.98));z-index:120;padding:20px;text-align:center;
@@ -45,191 +51,173 @@ body{
   transform: scale(1.05);
   box-shadow: 0 0 40px rgba(182, 255, 193, 0.9);
 }
-#start-btn:active{transform:scale(.995)}
 
-/* App layout */
+/* --- App layout --- */
 .hidden{display:none}
 #app{
-  min-height:100vh;padding:20px 16px 90px;
-  max-width:1100px;margin:0 auto;position:relative;z-index:2;
-  /* --- NEW: Ensure centering --- */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 20px 0 90px; /* No horizontal padding, let content decide */
+  max-width:1100px;
+  margin:0 auto;
+  position:relative;
+  z-index:2;
+  /* Add a fade-in for the whole app */
+  opacity: 0;
+  transition: opacity 1s ease-in;
 }
+#app.loaded {
+  opacity: 1;
+}
+
+/* --- CHANGED: Hero is now sticky --- */
 .hero{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;
-  /* --- NEW: Ensure hero stretches --- */
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;
+  margin: 0 auto;
   width: 100%;
-  max-width: 860px; /* Match letterbox max-width */
+  max-width: 860px;
+  padding: 10px 16px;
+  
+  /* Sticky header */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  /* Glass effect for header */
+  background: rgba(10, 2, 8, 0.7);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-border);
 }
-.title{font-family:"Great Vibes",cursive;font-size:2.1rem;color:#ffd1dc;margin:10px 0 18px;text-shadow:0 0 12px var(--color-pink-bright)}
+.title{font-family:"Great Vibes",cursive;font-size:2.1rem;color:#ffd1dc;margin:0; text-shadow:0 0 12px var(--color-pink-bright)}
 .controls{display:flex;gap:8px}
 .btn-small{
   background:#ffe6ee;border:none;padding:8px 10px;color:#5a1a2a;border-radius:10px;cursor:pointer;
-  /* --- NEW: Add nice transition --- */
   transition: background 0.2s ease;
 }
 .btn-small:hover {
   background: #ffd9e6;
 }
 
-/* background decor + NEW multi-color animation */
-#bg-decor{
-  position:fixed;inset:0;z-index:0;pointer-events:none;
-  background: radial-gradient(circle at center, var(--deep-bg-pink), #000);
-  animation: bgShift 30s ease-in-out infinite alternate;
+/* --- NEW: Scroll Prompt --- */
+.scroll-prompt {
+  text-align: center;
+  margin: 60px 0 100px;
+  color: var(--color-pink-light);
+  opacity: 0;
+  animation: fadeIn 2s 1s forwards;
 }
-@keyframes bgShift {
-  0% { background: radial-gradient(circle at center, var(--deep-bg-pink), #000); }
-  25% { background: radial-gradient(circle at center, var(--deep-bg-green), #000); }
-  50% { background: radial-gradient(circle at center, var(--deep-bg-blue), #000); }
-  75% { background: radial-gradient(circle at center, var(--deep-bg-purple), #000); }
-  100% { background: radial-gradient(circle at center, var(--deep-bg-pink), #000); }
+.scroll-prompt span {
+  display: block;
+  width: 1px;
+  height: 80px;
+  background: linear-gradient(to bottom, var(--color-pink-light), transparent);
+  margin: 10px auto 0;
+  animation: stretchDown 1.5s infinite ease-out;
 }
-
-
-/* --- NEW 3D FLIP CARD GALLERY --- */
-.gallery-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  z-index: 3;
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes stretchDown {
+  0% { transform: scaleY(0); transform-origin: top; }
+  50% { transform: scaleY(1); transform-origin: top; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
 }
 
-/* This container sets the 3D perspective */
-.flip-card-container {
-  /* --- CHANGED: Make responsive --- */
-  width: 90vw;
-  max-width: 300px;
-  height: 380px;
-  perspective: 1000px;
-  cursor: pointer;
-}
 
-/* This is the card that will flip */
-.flip-card {
-  position: relative;
+/* --- NEW: Gallery Carousel --- */
+.gallery-section {
   width: 100%;
-  height: 100%;
-  transition: transform 1s ease, opacity 1.5s ease;
-  transform-style: preserve-3d;
-  opacity: 0.3; /* Start faded out */
-}
-
-/* This class is toggled by JS to flip */
-.flip-card.is-flipped {
-  transform: rotateY(180deg);
-}
-/* This class is added by JS to show the card */
-.flip-card.active {
-  opacity: 1;
-  transform: scale(1.05);
-}
-
-/* Common styles for front and back */
-.flip-card-front,
-.flip-card-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden; /* Hides the side facing away */
-  border-radius: 20px;
-  
-  /* Dreamy glass effect */
+  padding: 80px 0;
+  margin-bottom: 80px;
+  /* Add a glass background to the whole section */
   background: var(--glass);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(5px);
+  position: relative;
+  z-index: 5;
+}
+.gallery-carousel {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory; /* This is the magic for carousels */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  padding: 20px 0;
+  gap: 20px;
+}
+/* This pseudo-element adds padding to the start/end for snapping */
+.gallery-carousel::before,
+.gallery-carousel::after {
+  content: '';
+  display: block;
+  width: calc(50% - 150px); /* Adjust to center the first/last item */
+}
+.carousel-item {
+  flex-shrink: 0;
+  width: 300px;
+  height: 380px;
+  scroll-snap-align: center; /* This snaps the item to the center */
+  border-radius: 20px;
   overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  border: 1px solid var(--glass-border);
+  transition: transform 0.5s ease, opacity 0.5s ease;
 }
-
-/* Front of the card (Photo) */
-.flip-card-front {
-  box-shadow: var(--shadow-green);
-}
-.flip-card-front img {
+.carousel-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: all 1s ease;
+  display: block;
+}
+/* Add a hover effect */
+.carousel-item:hover {
+  transform: scale(1.03);
 }
 
-/* Back of the card (Caption) */
-.flip-card-back {
-  transform: rotateY(180deg);
-  box-shadow: var(--shadow-pink);
-  padding: 20px;
-  text-align: center;
-  font-family: "Poppins", sans-serif;
-  font-size: 1.2rem;
-  font-weight: 300;
-  color: var(--color-text-light);
-}
-/* --- END OF 3D FLIP CARD GALLERY --- */
-
-
-/* letter */
+/* --- NEW: Scroll-Reveal Letter --- */
 #letterBox{
   display:block;
-  /* --- CHANGED: Make responsive --- */
-  width: 95vw;
+  width: 100%;
   max-width:860px;
-  margin:16px auto 20px;position:relative;z-index:4
+  margin: 80px auto 20px;
+  padding: 0 20px; /* Add horizontal padding back */
+  position:relative;
+  z-index: 4;
 }
-#typed{
-  background:var(--glass);border-radius:18px;padding:28px;font-family:"Great Vibes",cursive;font-size:1.35rem;line-height:1.7;color:var(--color-text-light);box-shadow:0 18px 60px rgba(0,0,0,0.6);backdrop-filter: blur(6px);max-height:60vh;overflow:auto;border:1px solid var(--glass-border);
-  /* --- NEW: Make scrolling smooth --- */
-  scroll-behavior: smooth;
+#letter-text {
+  font-family:"Great Vibes",cursive;
+  font-size:1.65rem;
+  line-height:1.8;
+  color: var(--color-text-light);
 }
-#typed.typing::after {
-  content: '...'; /* Blinking cursor */
-  animation: blink 1s step-end infinite;
+/* This is the key: all characters start faded */
+.letter-char {
+  opacity: 0.15;
+  transition: opacity 0.2s ease-in-out;
 }
-@keyframes blink {
-  50% { opacity: 0; }
+/* When JS adds this class, the character becomes visible */
+.letter-char.revealed {
+  opacity: 1;
+  color: #fff;
+  text-shadow: 0 0 10px var(--color-pink-light);
+}
+/* Make line breaks work */
+.letter-char.newline {
+  display: block;
 }
 
-/* final overlay */
-#finalOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(180deg, rgba(10,2,8,0.6), rgba(0,0,0,0.9));z-index:400;opacity:0;pointer-events:none;transition:opacity 1s ease}
+
+/* --- Final Overlay (Unchanged) --- */
+#finalOverlay{position:fixed;inset:0;display:flex;align:items;center;justify-content:center;flex-direction:column;background:linear-gradient(180deg, rgba(10,2,8,0.6), rgba(0,0,0,0.9));z-index:400;opacity:0;pointer-events:none;transition:opacity 1s ease}
 #finalOverlay.show{opacity:1;pointer-events:auto}
 #finalOverlay h1{font-family:"Great Vibes",cursive;font-size:2.8rem;color:#ffd1dc;margin-bottom:10px}
 #finalOverlay p{color:#ffe7ef;margin-bottom:16px;text-align:center;max-width:90%}
 
-/* floating/choreography helpers */
-.float{
-  position:fixed;pointer-events:none;user-select:none;z-index:150;
-  /* --- CHANGED: Increased base size --- */
-  font-size: 22px;
-  /* --- NEW: Add shadow to pop --- */
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-}
-.glowDot{
-  position:fixed;width:10px;height:10px;border-radius:50%;
-  animation: colorGlow 10s infinite alternate;
-  filter:blur(6px);z-index:50;pointer-events:none;
-}
-@keyframes colorGlow {
-  0% { background: rgba(255,182,193,.45); }
-  50% { background: rgba(182, 255, 193, 0.45); }
-  100% { background: rgba(182, 193, 255, 0.45); }
-}
-
-/* audio elements hidden */
+/* --- audio elements hidden --- */
 audio{display:none}
 
-/* responsiveness */
-@media(min-width:760px){ 
-  #typed{font-size:1.65rem} 
-}
-@media(max-width:420px){ 
+/* --- responsiveness --- */
+@media(max-width: 420px){ 
   .title{font-size:1.9rem} 
-  #typed{font-size:1.05rem;max-height:65vh} 
-  .flip-card-container { width: 90vw; max-width: 280px; height: 360px; }
+  #letter-text{font-size:1.35rem; line-height: 1.7;}
+  .carousel-item { width: 260px; height: 340px; }
+  .gallery-carousel::before,
+  .gallery-carousel::after { width: calc(50% - 130px); }
 }
