@@ -7,8 +7,6 @@ const CONFIG = {
     {file: "song4.mp3", title: "Leonora"}
   ],
 
-  // NEW SIMPLIFIED PHOTO GALLERY
-  // Just add your image files and captions here.
   photos: [
     {src: "set1-1.jpg", caption: "EO yarn?"},
     {src: "set1-2.jpg", caption: "Road trip memories"},
@@ -24,7 +22,6 @@ const CONFIG = {
   voiceNote: "voice.mp3", // optional; place voice.mp3 or leave blank ""
   
   letter: `Happy Birthday, my baby!
-
 
 Dear, Daniele Loise T. Guerta,
 
@@ -74,21 +71,16 @@ Nathan
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* ---------- STATE ---------- */
-  let audioCtx = null;
-  let masterGain = null;
-  let mediaSources = [];
-  let gainNodes = [];
+  /* ---------- STATE (Simplified) ---------- */
   let isMuted = false;
   let galleryInterval = null;
-  const CROSSFADE_TIME = 3.0; // Start next song 3s before current one ends
+  // --- REMOVED: All WebAudio API state variables ---
 
   /* ---------- ELEMENTS (Fixed IDs) ---------- */
   const intro = document.getElementById('intro-screen');
   const startBtn = document.getElementById('start-btn');
   const app = document.getElementById('app');
   
-  // NEW Gallery Elements
   const galleryCard = document.getElementById('gallery-card');
   const galleryImage = document.getElementById('gallery-image');
   const galleryCaption = document.getElementById('gallery-caption');
@@ -102,56 +94,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const bgDecor = document.getElementById('bg-decor');
 
   /* ---------- PREPARE audio elements ---------- */
+  // --- CHANGED: Simplified audio setup ---
   const audioEls = CONFIG.songs.map((s, i) => {
     const el = document.getElementById(`audio-song-${i+1}`);
-    el.src = s.file;
-    el.preload = 'auto';
-    el.crossOrigin = "anonymous";
+    if (el) {
+        el.src = s.file;
+        el.preload = 'auto';
+        el.crossOrigin = "anonymous";
+    }
     return el;
-  });
+  }).filter(el => el != null); // Filter out any nulls if HTML IDs are wrong
+
   const voiceEl = document.getElementById('audio-voice');
-  if (CONFIG.voiceNote) {
+  if (CONFIG.voiceNote && voiceEl) {
     voiceEl.src = CONFIG.voiceNote;
     voiceEl.preload = 'auto';
+  } else if (!voiceEl) {
+      // console.warn("voice.mp3 defined in CONFIG but #audio-voice element not found.");
   }
 
-  /* ---------- WebAudio setup for crossfade ---------- */
-  function initAudioContext() {
-    if (audioCtx) return;
-    try {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      masterGain = audioCtx.createGain();
-      masterGain.gain.value = isMuted ? 0 : 1;
-      masterGain.connect(audioCtx.destination);
 
-      audioEls.forEach((audioEl, idx) => {
-        const src = audioCtx.createMediaElementSource(audioEl);
-        const g = audioCtx.createGain();
-        g.gain.value = 0; // Start all silent
-        src.connect(g);
-        g.connect(masterGain);
-        mediaSources[idx] = src;
-        gainNodes[idx] = g;
-      });
-    } catch (e) {
-      console.error("Web Audio API is not supported in this browser or failed to init.", e);
-    }
-  }
-
-  function crossfadeTo(index, fadeSec = 2.0) {
-    if (!audioCtx) return;
-    const now = audioCtx.currentTime;
-    gainNodes.forEach((g, idx) => {
-      try {
-        g.gain.cancelScheduledValues(now);
-        g.gain.setValueAtTime(g.gain.value, now);
-        const targetValue = (idx === index) ? 1.0 : 0.0;
-        g.gain.linearRampToValueAtTime(targetValue, now + fadeSec);
-      } catch (err) {
-        console.warn("Error during crossfade node.", err);
-      }
-    });
-  }
+  /* ---------- REMOVED: WebAudio setup for crossfade ---------- */
 
   function handleAudioError(e, index) {
     console.error(`Error playing audio file: ${CONFIG.songs[index]?.file || 'voice note'}`, e);
@@ -166,33 +129,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const photo = CONFIG.photos[index];
       if (!photo) return;
       
-      // 1. Fade card out
       galleryCard.classList.remove('active');
       
-      // 2. After a short delay, update the content
       setTimeout(() => {
         galleryImage.src = photo.src;
         galleryImage.alt = photo.caption;
         galleryCaption.textContent = photo.caption;
         
-        // 3. Make sure card is facing front
         galleryCard.classList.remove('is-flipped');
         
-        // 4. Fade card back in
         setTimeout(() => {
             galleryCard.classList.add('active');
-        }, 100); // Short delay to allow CSS to see change
+        }, 100);
         
-      }, 1000); // Wait for fade-out to finish
+      }, 1000);
     }
 
-    // Click to flip the card
     galleryCard.parentElement.addEventListener('click', () => {
       galleryCard.classList.toggle('is-flipped');
     });
 
-    // Start the slideshow
-    updateCard(photoIndex); // Show first card
+    updateCard(photoIndex);
     
     galleryInterval = setInterval(() => {
       photoIndex = (photoIndex + 1) % CONFIG.photos.length;
@@ -202,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------- Floating petals, hearts, glow ---------- */
   function startFloatingParticles() {
-    // Added more cute symbols
     const symbols = ["💗","💞","🌸","💖","🌹", "✨", "🌱"];
     function spawnSymbol() {
       const el = document.createElement('span');
@@ -210,8 +166,9 @@ document.addEventListener('DOMContentLoaded', () => {
       el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
       el.style.left = Math.random()*100 + "vw";
       el.style.top = (Math.random()*8 - 8) + "vh";
-      el.style.fontSize = (12 + Math.random()*24) + "px";
-      el.style.opacity = (0.6 + Math.random()*0.4);
+      // --- CHANGED: Increased size and opacity ---
+      el.style.fontSize = (18 + Math.random()*20) + "px";
+      el.style.opacity = (0.7 + Math.random()*0.3);
       el.style.transition = "transform 10s linear, opacity 10s linear";
       document.body.appendChild(el);
       
@@ -247,14 +204,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let i = 0;
     (function step(){
       if (i < text.length) {
-        // Handle newlines
+        
+        // --- CHANGED: Smart scroll logic ---
+        // Check if user is scrolled to the bottom (with a 10px buffer)
+        const isScrolledToBottom = typedEl.scrollHeight - typedEl.clientHeight <= typedEl.scrollTop + 10;
+        
         if (text.charAt(i) === '\n') {
           typedEl.innerHTML += '<br>';
         } else {
           typedEl.innerHTML += text.charAt(i);
         }
         i++;
-        typedEl.scrollTop = typedEl.scrollHeight; // Auto-scroll
+
+        // Only auto-scroll if the user was already at the bottom
+        if (isScrolledToBottom) {
+          typedEl.scrollTop = typedEl.scrollHeight;
+        }
+        
         setTimeout(step, speed + Math.random()*12);
       } else {
         typedEl.classList.remove('typing'); // Remove blinking cursor
@@ -275,8 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
       y: -Math.random()*canvas.height,
       vx: (Math.random()-0.5)*6,
       vy: 2+Math.random()*6,
-      size: 15 + Math.random() * 15, // Made hearts bigger
-      color: `hsl(${Math.random()*60+330}, 80%, 65%)`, // Pinks and reds
+      size: 15 + Math.random() * 15,
+      color: `hsl(${Math.random()*60+330}, 80%, 65%)`,
       rot: Math.random()*360
     }));
     let t = 0;
@@ -287,83 +253,127 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.save();
         ctx.translate(p.x,p.y);
         ctx.rotate(p.rot*Math.PI/180);
-        ctx.font = `${p.size}px Arial`; // Use font size for emoji size
+        ctx.font = `${p.size}px Arial`;
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.y < 0 ? 0 : 1; // Fade in at top
-        ctx.fillText('💖', -p.size/2, p.size/2); // Draw a heart emoji
+        ctx.globalAlpha = p.y < 0 ? 0 : 1;
+        ctx.fillText('💖', -p.size/2, p.size/2);
         ctx.restore();
       });
-      t++; if(t < 300) requestAnimationFrame(frame); else canvas.remove(); // Lasts longer
+      t++; if(t < 300) requestAnimationFrame(frame); else canvas.remove();
     }
     frame();
   }
 
-  /* ---------- PDF download ---------- */
+  /* ---------- PDF download (CHANGED) ---------- */
   downloadPdf.addEventListener('click', ()=>{
+    // --- NEW: Use html2canvas to create PDF from design ---
+    const originalText = downloadPdf.textContent;
+    downloadPdf.textContent = "Loading...";
+    
     try {
-      // Make sure the jsPDF library is loaded
       if (typeof jsPDF === 'undefined') {
-        alert("Error: PDF library not loaded. Please check your internet connection.");
+        alert("Error: PDF library not loaded.");
+        downloadPdf.textContent = originalText;
         return;
       }
+      if (typeof html2canvas === 'undefined') {
+        alert("Error: html2canvas library not loaded.");
+        downloadPdf.textContent = originalText;
+        return;
+      }
+
       const { jsPDF } = window.jspdf;
-      
-      const doc = new jsPDF({unit:'pt',format:'letter'});
-      doc.setFontSize(14); doc.setFont("Times","Normal");
-      // Split text to handle page breaks
-      const lines = doc.splitTextToSize(CONFIG.letter, 520);
-      doc.text(lines, 40, 60);
-      doc.save("Happy_Birthday_Letter.pdf");
+      const letterElement = document.getElementById('letterBox');
+
+      html2canvas(letterElement, {
+          scale: 2, // Increase resolution
+          useCORS: true, // For any potential background images
+          backgroundColor: null, // Use element's background
+          onclone: (doc) => {
+            // Fix for html2canvas not capturing overflow content
+            const clonedTyped = doc.getElementById('typed');
+            clonedTyped.style.maxHeight = 'none'; 
+            clonedTyped.style.overflow = 'visible';
+          }
+      }).then(canvas => {
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF({
+              orientation: 'p',
+              unit: 'px',
+              format: 'letter'
+          });
+          
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+          const imgWidth = canvas.width;
+          const imgHeight = canvas.height;
+          
+          // Calculate aspect ratio
+          const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+          const imgX = (pdfWidth - imgWidth * ratio) / 2;
+          const imgY = 10; // Add some margin at the top
+
+          pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+          pdf.save("Happy_Birthday_Letter.pdf");
+          downloadPdf.textContent = originalText;
+      }).catch(e => {
+          console.error("html2canvas failed:", e);
+          alert("Error: Could not generate PDF.");
+          downloadPdf.textContent = originalText;
+      });
+
     } catch (e) {
-      console.error("jsPDF failed:", e);
+      console.error("PDF generation failed:", e);
       alert("Error: Could not generate PDF. Please try again.");
+      downloadPdf.textContent = originalText;
     }
   });
 
-  /* ---------- Mute toggle ---------- */
+  /* ---------- Mute toggle (CHANGED) ---------- */
   muteBtn.addEventListener('click', ()=>{
     isMuted = !isMuted;
-    if (masterGain) {
-      masterGain.gain.value = isMuted ? 0 : 1;
+    // --- NEW: Loop through HTML audio elements ---
+    audioEls.forEach(el => {
+        if(el) el.muted = isMuted;
+    });
+    if (voiceEl) {
+        voiceEl.muted = isMuted;
     }
     muteBtn.textContent = isMuted ? "Unmute" : "Mute";
   });
 
-  /* ---------- Play all songs sequentially ---------- */
+  /* ---------- Play all songs sequentially (CHANGED) ---------- */
   function playSong(index) {
     if (index >= audioEls.length) {
-      onPlaylistComplete();
+      onPlaylistComplete(); // All songs finished
       return;
     }
 
     const audioEl = audioEls[index];
-    let hasTriggeredNext = false;
+    if (!audioEl) {
+        console.error(`Audio element ${index+1} not found.`);
+        playSong(index + 1); // Skip to next
+        return;
+    }
 
-    const onTimeUpdate = () => {
-      if (hasTriggeredNext) return;
-      if (audioEl.duration && (audioEl.duration - audioEl.currentTime) < CROSSFADE_TIME) {
-        hasTriggeredNext = true;
-        audioEl.removeEventListener('timeupdate', onTimeUpdate);
-        playSong(index + 1); // start next
-      }
-    };
-
+    // --- NEW: Simple onended chain ---
     audioEl.onended = () => {
-      audioEl.removeEventListener('timeupdate', onTimeUpdate);
-      if (!hasTriggeredNext) {
-        playSong(index + 1);
-      }
+      playSong(index + 1); // Play next song when this one finishes
     };
 
-    audioEl.addEventListener('timeupdate', onTimeUpdate);
+    audioEl.onerror = (e) => {
+        handleAudioError(e, index);
+        playSong(index + 1); // Skip to next song on error
+    };
+    
     audioEl.currentTime = 0;
+    audioEl.muted = isMuted; // Ensure mute state is respected
     audioEl.play().catch((e) => handleAudioError(e, index));
-    crossfadeTo(index, 2.0);
   }
 
   /* ---------- After playlist completes ---------- */
   function onPlaylistComplete(){
-    burstConfetti(); // Run new heart confetti
+    burstConfetti();
     finalOverlay.classList.add('show');
     finalOverlay.setAttribute('aria-hidden','false');
   }
@@ -374,19 +384,16 @@ document.addEventListener('DOMContentLoaded', () => {
     finalOverlay.setAttribute('aria-hidden','true');
   });
 
-  /* ---------- Orchestration / Start button ---------- */
+  /* ---------- Orchestration / Start button (CHANGED) ---------- */
   startBtn.addEventListener('click', async () => {
-    initAudioContext();
-    if (audioCtx && audioCtx.state === 'suspended') {
-      try { await audioCtx.resume(); } catch(e){}
-    }
+    // --- REMOVED: AudioContext resume logic ---
 
     // Unlock playback permission
-    for (let i = 0; i < audioEls.length; i++) {
-      try { await audioEls[i].play(); audioEls[i].pause(); audioEls[i].currentTime = 0; }  
-      catch(e){ handleAudioError(e, i); }
+    for (const el of audioEls) {
+      try { await el.play(); el.pause(); el.currentTime = 0; }  
+      catch(e){ handleAudioError(e, audioEls.indexOf(el)); }
     }
-    if (CONFIG.voiceNote) {
+    if (CONFIG.voiceNote && voiceEl) {
       try { await voiceEl.play(); voiceEl.pause(); voiceEl.currentTime = 0; }  
       catch(e){ handleAudioError(e, 'voice'); }
     }
@@ -400,19 +407,20 @@ document.addEventListener('DOMContentLoaded', () => {
       app.setAttribute('aria-hidden', 'false');
     }, 600);
 
-    // render first photo set & start cycles
-    startFlipCardGallery(); // Start NEW gallery
+    startFlipCardGallery();
     startFloatingParticles();
 
-    // type letter while music plays
+    // --- CHANGED: Start music *before* typing to fix delay ---
+    playSong(0);
+
+    // type letter
     typeWriter(CONFIG.letter, 28, ()=>{
-      if (CONFIG.voiceNote) {
+      if (CONFIG.voiceNote && voiceEl) {
         voiceEl.play().catch((e) => handleAudioError(e, 'voice'));
       }
     });
 
-    // finally start music chain
-    playSong(0);
+    // --- REMOVED: playSong(0) from here ---
   });
 
 }); // End DOMContentLoaded
