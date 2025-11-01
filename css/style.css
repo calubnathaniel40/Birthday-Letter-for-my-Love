@@ -8,8 +8,8 @@
   --deep-bg-pink: #4d1a36;
   --deep-bg-blue: #1a364d;
   
-  --glass: rgba(255, 240, 245, 0.08);
-  --glass-border: rgba(255, 192, 203, 0.18);
+  --glass: rgba(255, 240, 245, 0.1);
+  --glass-border: rgba(255, 192, 203, 0.2);
   --shadow-pink: 0 0 25px rgba(255, 182, 193, 0.8);
 
   /* Fonts */
@@ -24,7 +24,8 @@ body{
   background: #000;
   color:#fff;
   -webkit-font-smoothing:antialiased;
-  overflow-y: hidden; /* Scrolling is handled by #app */
+  /* CRITICAL FIX: This is now set by JS *after* start is clicked */
+  overflow-y: auto; 
 }
 
 #constellation-bg {
@@ -39,7 +40,9 @@ body{
 
 #intro-screen{
   position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
-  background:linear-gradient(180deg, rgba(0,0,0,0.95), rgba(8,3,10,0.98));z-index:120;padding:20px;text-align:center;
+  background:linear-gradient(180deg, rgba(0,0,0,0.95), rgba(8,3,10,0.98));
+  z-index: 1000;
+  padding:20px;text-align:center;
 }
 #intro-screen h1{font-family: var(--font-script);font-size:2.7rem;color:var(--color-pink-light);text-shadow:0 6px 30px rgba(255,120,160,0.18)}
 #intro-screen .sub{color:rgba(255,220,235,0.9)}
@@ -57,7 +60,7 @@ body{
 /* App layout */
 .hidden{display:none}
 #app{
-  padding: 0 0 90px; /* No top padding, hero handles it */
+  padding: 0 0 90px;
   max-width:1100px;
   margin:0 auto;
   position:relative;
@@ -70,8 +73,7 @@ body{
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  /* This is the magic for parallax */
-  perspective: 1px;
+  /* Switched to 2D perspective for simpler transforms */
 }
 #app.loaded {
   opacity: 1;
@@ -113,7 +115,7 @@ body{
   opacity: 0;
   animation: fadeIn 2s 1s forwards;
   position: relative;
-  z-index: 5; /* Ensure it's above parallax items */
+  z-index: 5;
 }
 .scroll-prompt span {
   display: block;
@@ -131,7 +133,7 @@ body{
 }
 
 
-/* --- NEW: Parallax & Fade-in Gallery --- */
+/* --- NEW: Fade & SLIDE Gallery (No Zoom) --- */
 .gallery-section {
   width: 100%;
   padding: 80px 0;
@@ -153,20 +155,24 @@ body{
   box-shadow: 0 10px 40px rgba(0,0,0,0.5);
   border: 1px solid var(--glass-border);
   
-  /* Parallax: move back and scale up to fill view */
-  transform: translateZ(-1px) scale(1.8);
-  
-  /* Fade-in: start faded out */
-  opacity: 0.1;
-  transition: opacity 0.6s ease-out;
+  /* This is the "before" state for the animation */
+  opacity: 0;
+  transform: translateX(-30px); /* Start from the left */
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
+/* Alternate slide-in direction for a professional feel */
+.carousel-item:nth-child(even) {
+  transform: translateX(30px); /* Start from the right */
+}
+/* This is the "after" state (when visible) */
 .carousel-item.is-visible {
   opacity: 1;
+  transform: translateX(0);
 }
 .carousel-item img {
   width: 100%;
   height: auto;
-  object-fit: cover;
+  object-fit: cover; /* Changed from 'cover' to 'contain' */
   display: block;
 }
 
@@ -176,12 +182,11 @@ body{
   width: 100%;
   max-width:860px;
   margin: 80px auto 20px;
-  padding: 0 20px;
   position:relative;
-  z-index: 5; /* Above parallax */
+  z-index: 5;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem; /* Space between paragraphs */
+  gap: 2.5rem;
   background: var(--glass);
   backdrop-filter: blur(5px);
   border: 1px solid var(--glass-border);
@@ -191,7 +196,7 @@ body{
 
 /* This is the "before" state for each slide */
 .letter-slide {
-  opacity: 0.1;
+  opacity: 0;
   transform: translateY(30px);
   transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
@@ -202,6 +207,13 @@ body{
 }
 
 /* --- NEW: Formal Letter Typography --- */
+.letter-slide.libra {
+  font-family: var(--font-formal);
+  color: var(--color-pink-light);
+  font-size: 2rem;
+  text-align: center;
+  opacity: 0.5; /* Make it subtle */
+}
 .letter-slide.date {
   font-family: var(--font-formal);
   font-style: italic;
@@ -241,7 +253,7 @@ audio{display:none}
 
 @media(max-width: 420px){ 
   .title{font-size:1.9rem}
-  .carousel-item { width: 90vw; max-width: 300px; transform: translateZ(-1px) scale(1.5); }
+  .carousel-item { width: 90vw; max-width: 300px; }
   .gallery-section { gap: 80px; }
   #letterBox { padding: 25px; }
 
