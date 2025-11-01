@@ -24,8 +24,10 @@ body{
   background: #000;
   color:#fff;
   -webkit-font-smoothing:antialiased;
-  /* CRITICAL FIX: This is now set by JS *after* start is clicked */
-  overflow-y: auto; 
+  /* CRITICAL BUG FIX: This line is removed. */
+  /* 'overflow: hidden' is now set by JS *after* the start button is clicked. */
+  /* This ensures the intro screen is clickable. */
+  overflow-y: auto;
 }
 
 #constellation-bg {
@@ -41,7 +43,7 @@ body{
 #intro-screen{
   position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
   background:linear-gradient(180deg, rgba(0,0,0,0.95), rgba(8,3,10,0.98));
-  z-index: 1000;
+  z-index: 1000; /* Ensure intro is on top */
   padding:20px;text-align:center;
 }
 #intro-screen h1{font-family: var(--font-script);font-size:2.7rem;color:var(--color-pink-light);text-shadow:0 6px 30px rgba(255,120,160,0.18)}
@@ -73,7 +75,7 @@ body{
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  /* Switched to 2D perspective for simpler transforms */
+  perspective: 2px; /* For parallax scrolling */
 }
 #app.loaded {
   opacity: 1;
@@ -172,7 +174,7 @@ body{
 .carousel-item img {
   width: 100%;
   height: auto;
-  object-fit: cover; /* Changed from 'cover' to 'contain' */
+  object-fit: cover;
   display: block;
 }
 
@@ -212,7 +214,8 @@ body{
   color: var(--color-pink-light);
   font-size: 2rem;
   text-align: center;
-  opacity: 0.5; /* Make it subtle */
+  opacity: 0; /* Starts hidden, fades in */
+  text-shadow: 0 0 15px var(--color-pink-light);
 }
 .letter-slide.date {
   font-family: var(--font-formal);
