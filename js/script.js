@@ -42,4 +42,412 @@ const CONFIG = {
 
   photos: [
     {src: "set1-1.jpg", caption: "EO yarn?"},
-    {src:...
+    {src: "set1-2.jpg", caption: "Road trip memories"},
+    {src: "set1-3.jpg", caption: "Bleehhbleehhh"},
+    {src: "set1-4.jpg", caption: "EK Moments"},
+    {src: "set2-1.jpg", caption: "Random galaa"},
+    {src: "set2-2.jpg", caption: "Picture muna kayo?!"},
+    {src: "set2-3.jpg", caption: "Birthdate?"},
+    {src: "set2-4.jpg", caption: "Watch your sport"},
+    // Add as many more as you like
+  ],
+  
+  voiceNote: "voice.mp3", // optional; place voice.mp3 or leave blank ""
+};
+/* ===================== end CONFIG ===================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ---------- STATE ---------- */
+  let isMuted = false;
+  let isScrolling = false; // Flag to prevent re-triggering voice
+
+  /* ---------- ELEMENTS ---------- */
+  const intro = document.getElementById('intro-screen');
+  const startBtn = document.getElementById('start-btn');
+  const app = document.getElementById('app');
+  
+  const letterBox = document.getElementById('letterBox');
+  const gallerySectionEl = document.querySelector('.gallery-section');
+  const canvas = document.getElementById('constellation-bg');
+  
+  const downloadPdf = document.getElementById('downloadPdf');
+  const muteBtn = document.getElementById('muteBtn');
+  const finalOverlay = document.getElementById('finalOverlay');
+  const finalClose = document.getElementById('finalClose');
+
+  /* ---------- AUDIO ---------- */
+  const audioEls = CONFIG.songs.map((s, i) => {
+    const el = document.getElementById(`audio-song-${i+1}`);
+    if (el) { el.src = s.file; el.preload = 'auto'; el.crossOrigin = "anonymous"; }
+    return el;
+  }).filter(el => el != null);
+
+  const voiceEl = document.getElementById('audio-voice');
+  if (CONFIG.voiceNote && voiceEl) {
+    voiceEl.src = CONFIG.voiceNote;
+    voiceEl.preload = 'auto';
+  }
+  
+  function handleAudioError(e, index) {
+    console.error(`Error playing audio file: ${CONFIG.songs[index]?.file || 'voice note'}`, e);
+  }
+  
+  function playSong(index) {
+    if (index >= audioEls.length) {
+      onPlaylistComplete();
+      return;
+    }
+    const audioEl = audioEls[index];
+    if (!audioEl) {
+      playSong(index + 1);
+      return;
+    }
+    audioEl.onended = () => playSong(index + 1);
+    audioEl.onerror = (e) => {
+        handleAudioError(e, index);
+        playSong(index + 1);
+    };
+    audioEl.currentTime = 0;
+    audioEl.muted = isMuted;
+    audioEl.play().catch((e) => handleAudioError(e, index));
+  }
+
+  /* --- NEW: Constellation Background w/ Shooting Stars --- */
+  function initConstellation() {
+    const ctx = canvas.getContext('2d');
+    let width, height, particles, shootingStars;
+    
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      particles = Array.from({length: 100}, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: Math.random() * 0.2 - 0.1,
+        vy: Math.random() * 0.4 - 0.2,
+        radius: 1 + Math.random() * 1.5
+      }));
+      shootingStars = [];
+    }
+    
+    function draw() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, width, height);
+      
+      // Draw particles
+      ctx.fillStyle = 'rgba(255, 219, 230, 0.5)';
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+        
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      
+      // Draw connecting lines
+      ctx.strokeStyle = 'rgba(255, 192, 203, 0.15)';
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // --- NEW: Shooting Stars ---
+      // Spawn new shooting stars
+      if (Math.random() > 0.99 && shootingStars.length < 3) {
+        shootingStars.push({
+          x: Math.random() * width,
+          y: Math.random() * 100, // Start near top
+          len: 100 + Math.random() * 100,
+          vx: 5 + Math.random() * 5, // Fast
+          vy: 3 + Math.random() * 3, // Fast
+          life: 1.0, // Opacity
+        });
+      }
+
+      // Draw and update shooting stars
+      ctx.lineCap = 'round';
+      shootingStars.forEach((s, i) => {
+        if (s.life <= 0) {
+          shootingStars.splice(i, 1);
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(s.x, s.y);
+          ctx.lineTo(s.x + s.len, s.y + (s.len * (s.vy / s.vx)));
+          ctx.strokeStyle = `rgba(255, 255, 255, ${s.life * 0.5})`;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          
+          s.x += s.vx;
+          s.y += s.vy;
+          s.life -= 0.01;
+        }
+      });
+      
+      requestAnimationFrame(draw);
+    }
+    
+    window.addEventListener('resize', resize);
+    resize();
+    draw();
+  }
+
+  /* --- NEW: Populate page with gallery and letter slides --- */
+  function populateContent() {
+    // 1. Populate Gallery
+    CONFIG.photos.forEach(photo => {
+      const item = document.createElement('div');
+      item.className = 'carousel-item';
+      item.innerHTML = `<img src="${photo.src}" alt="${photo.caption}">`;
+      gallerySectionEl.appendChild(item);
+    });
+
+    // 2. Populate Letter Slides
+    CONFIG.letter.forEach(slide => {
+      const item = document.createElement('div');
+      // e.g., "letter-slide" and "letter-slide-body"
+      item.className = `letter-slide ${slide.type}`; 
+      
+      // Convert newlines in text to <br> tags
+      item.innerHTML = slide.text.replace(/\n/g, '<br>');
+      
+      letterBox.appendChild(item);
+    });
+  }
+
+  /* --- NEW: Setup Intersection Observer (for photos AND letter) --- */
+  function setupIntersectionObserver() {
+    // Watch both photos and letter slides
+    const items = document.querySelectorAll('.carousel-item, .letter-slide');
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        } else {
+          // Keep this simple: only fade in. Fading out is complex
+          // and can be annoying if you scroll back up.
+          // For a robust fade-out, you'd check entry.boundingClientRect.y
+          
+          // Let's enable fade-out *only* if scrolling down
+          if (entry.boundingClientRect.top < 0) {
+             // Do nothing, keep it visible
+          } else {
+            entry.target.classList.remove('is-visible');
+          }
+        }
+      });
+    }, {
+      root: app, // We observe scrolling *within* the #app container
+      rootMargin: '0px',
+      threshold: 0.2 // Trigger when 20% of the item is visible
+    });
+
+    items.forEach(item => {
+      observer.observe(item);
+    });
+  }
+
+  /* --- NEW: Reliable PDF download (for formal letter) --- */
+  downloadPdf.addEventListener('click', ()=>{
+    const originalText = downloadPdf.textContent;
+    downloadPdf.textContent = "Loading...";
+    
+    try {
+      if (typeof jsPDF === 'undefined') {
+        alert("Error: PDF library not loaded.");
+        downloadPdf.textContent = originalText;
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+      const margin = 40;
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const usableWidth = pageWidth - (margin * 2);
+      let cursorY = margin + 20; // Start cursor
+
+      // Function to check and add new page
+      function checkPageBreak(lineHeight) {
+        if (cursorY + lineHeight > pageHeight - margin) {
+          doc.addPage();
+          cursorY = margin;
+        }
+      }
+
+      CONFIG.letter.forEach(slide => {
+        let textLines;
+        switch(slide.type) {
+          case 'date':
+            checkPageBreak(30);
+            doc.setFont('times', 'italic');
+            doc.setFontSize(11);
+            doc.text(slide.text, margin, cursorY);
+            cursorY += 30;
+            break;
+            
+          case 'salutation':
+            checkPageBreak(40);
+            doc.setFont('times', 'bold'); // 'Great Vibes' isn't standard in jsPDF
+            doc.setFontSize(18);
+            doc.text(slide.text, margin, cursorY);
+            cursorY += 40;
+            break;
+            
+          case 'body':
+            checkPageBreak(30);
+            doc.setFont('times', 'normal');
+            doc.setFontSize(11);
+            textLines = doc.splitTextToSize(slide.text, usableWidth);
+            doc.text(textLines, margin, cursorY);
+            cursorY += (textLines.length * 11) + 11; // Add paragraph spacing
+            break;
+            
+          case 'closing':
+            checkPageBreak(20);
+            doc.setFont('times', 'bold'); // 'Great Vibes'
+            doc.setFontSize(18);
+            doc.text(slide.text, margin, cursorY);
+            cursorY += 20;
+            break;
+        }
+      });
+
+      doc.save("Happy_Birthday_Letter.pdf");
+      downloadPdf.textContent = originalText;
+
+    } catch (e) {
+      console.error("PDF generation failed:", e);
+      alert("Error: Could not generate PDF. Please try again.");
+      downloadPdf.textContent = originalText;
+    }
+  });
+
+  /* --- Mute toggle --- */
+  muteBtn.addEventListener('click', ()=>{
+    isMuted = !isMuted;
+    audioEls.forEach(el => { if(el) el.muted = isMuted; });
+    if (voiceEl) { voiceEl.muted = isMuted; }
+    muteBtn.textContent = isMuted ? "Unmute" : "Mute";
+  });
+
+  /* --- Final overlay --- */
+  function onPlaylistComplete(){
+    if (!finalOverlay.classList.contains('show')) {
+        burstConfetti();
+        finalOverlay.classList.add('show');
+        finalOverlay.setAttribute('aria-hidden','false');
+    }
+  }
+  
+  finalClose.addEventListener('click', ()=> {
+    finalOverlay.classList.remove('show');
+    finalOverlay.setAttribute('aria-hidden','true');
+  });
+
+  // Confetti
+  function burstConfetti() {
+    const canvas = document.createElement('canvas');  
+    canvas.style.position='fixed'; canvas.style.left=0; canvas.style.top=0;  
+    canvas.style.zIndex=9999; canvas.style.pointerEvents='none';
+    document.body.appendChild(canvas); canvas.width = innerWidth; canvas.height = innerHeight;
+    const ctx = canvas.getContext('2d');
+    const pieces = Array.from({length:220}, ()=>({
+      x: Math.random()*canvas.width, y: -Math.random()*canvas.height,
+      vx: (Math.random()-0.5)*6, vy: 2+Math.random()*6,
+      size: 15 + Math.random() * 15,
+      color: `hsl(${Math.random()*60+330}, 80%, 65%)`, rot: Math.random()*360
+    }));
+    let t = 0;
+    function frame(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      pieces.forEach(p=>{
+        p.x += p.vx; p.y += p.vy; p.rot += 3;
+        ctx.save();
+        ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+        ctx.font = `${p.size}px Arial`; ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.y < 0 ? 0 : 1;
+        ctx.fillText('💖', -p.size/2, p.size/2);
+        ctx.restore();
+      });
+      t++; if(t < 300) requestAnimationFrame(frame); else canvas.remove();
+    }
+    frame();
+  }
+
+  /* ---------- Orchestration / Start button ---------- */
+  startBtn.addEventListener('click', async () => {
+    // 1. Unlock playback permission
+    for (const el of audioEls) {
+      try { await el.play(); el.pause(); el.currentTime = 0; }  
+      catch(e){ handleAudioError(e, audioEls.indexOf(el)); }
+    }
+    if (CONFIG.voiceNote && voiceEl) {
+      try { await voiceEl.play(); voiceEl.pause(); voiceEl.currentTime = 0; }  
+      catch(e){ handleAudioError(e, 'voice'); }
+    }
+
+    // 2. show app & start visuals
+    intro.style.opacity = 0;
+    intro.setAttribute('aria-hidden', 'true');
+    setTimeout(()=> {
+      intro.style.display = 'none';
+      app.classList.remove('hidden');
+      
+      // --- BUG FIX IS HERE ---
+      // This line was outside the click handler,
+      // breaking the button. Now it's inside.
+      document.body.style.overflow = 'hidden'; 
+      
+      app.classList.add('loaded');
+    }, 600);
+    
+    // 3. Populate the content
+    populateContent();
+
+    // 4. Start the new background
+    initConstellation();
+
+    // 5. Wait for browser to draw, then set up observers
+    requestAnimationFrame(() => {
+      setupIntersectionObserver();
+      
+      // Trigger voice at the end
+      const lastSlide = document.querySelector('.letter-slide:last-child');
+      if (lastSlide && voiceEl && CONFIG.voiceNote) {
+        const voiceObserver = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting && voiceEl.paused && !isScrolling) {
+            isScrolling = true;
+            voiceEl.play().catch((e) => handleAudioError(e, 'voice'));
+            voiceObserver.disconnect(); // Only play once
+          }
+        }, { root: app, threshold: 0.8 });
+        voiceObserver.observe(lastSlide);
+      }
+    });
+    
+    // 6. Start the music
+    playSong(0);
+  });
+  
+  // No style on body at load, let intro screen be clickable
+
+}); // End DOMContentLoaded
+
