@@ -114,26 +114,25 @@ document.addEventListener('DOMContentLoaded', () => {
     let width, height, particles, twinklingStars, shootingStars;
     
     // --- NEW: Accurate coordinates for Libra constellation ---
-    // (Normalized 0-1)
+    // (Normalized 0-1) based on the image you provided
     const libraStars = [
-        { x: 0.0, y: 0.5 },  // Zubenelgenubi (Alpha)
-        { x: 0.1, y: 0.1 },  // Zubeneschamali (Beta)
-        { x: 0.3, y: 0.6 },  // Zubenelhakrabi (Gamma)
-        { x: 0.6, y: 0.7 },  // Brachium (Sigma)
+        { x: 0.0, y: 0.5 },  // Zubenelgenubi (Alpha Librae)
+        { x: 0.1, y: 0.1 },  // Zubeneschamali (Beta Librae)
+        { x: 0.3, y: 0.6 },  // Zubenelhakrabi (Gamma Librae)
+        { x: 0.6, y: 0.7 },  // Brachium (Sigma Librae)
         { x: 1.0, y: 0.65 }, // Upsilon Librae
         { x: 0.9, y: 0.0 },  // Tau Librae
-        { x: 0.3, y: 0.6 },  // Duplicate Gamma for line
-        { x: 0.1, y: 0.1 }   // Duplicate Beta for line
     ];
+    // Lines connecting the stars by their index
     const libraLines = [
-        [0, 1], [0, 2], [1, 5], [2, 3], [3, 4], [3, 6], [4, 5]
+        [0, 1], [0, 2], [1, 5], [2, 3], [3, 4], [4, 5]
     ];
 
     function resize() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
       
-      particles = Array.from({length: 80}, () => ({
+      particles = Array.from({length: 80}, () => ({ // Reduced particle count
         x: Math.random() * width,
         y: Math.random() * height,
         vx: Math.random() * 0.2 - 0.1,
@@ -141,7 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
         radius: 1 + Math.random() * 1
       }));
 
-      twinklingStars = Array.from({length: 30}, () => ({
+      // More twinkling stars
+      twinklingStars = Array.from({length: 40}, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
         radius: Math.random() * 1.5,
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       // --- NEW: Draw Shooting Stars (More Frequent) ---
-      if (Math.random() > 0.97 && shootingStars.length < 5) { // Spawn more
+      if (Math.random() > 0.985 && shootingStars.length < 5) { // Spawn more
         shootingStars.push({
           x: Math.random() * width, y: Math.random() * 100,
           len: 150 + Math.random() * 150, // Longer tails
