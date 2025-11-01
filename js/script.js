@@ -1,18 +1,10 @@
 /* ===================== CONFIG - Add your content here ===================== */
 
-// --- NEW: Letter is now an array of "slides" ---
-// This allows us to format it and fade in each paragraph.
-const today = new Date();
-const formattedDate = today.toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric'
-});
-
 const CONFIG = {
-  // --- NEW: Formatted letter slides ---
+  // --- NEW: Formatted letter slides with Libra sign and new date ---
   letter: [
-    { type: 'date', text: formattedDate },
+    { type: 'libra', text: '♎' },
+    { type: 'date', text: 'October 31, 2025' },
     { type: 'salutation', text: 'Dear, Daniele Loise T. Guerta,' },
     { type: 'body', text: 'Happy birthday, my babyyy. I hope today fills your heart with peace, joy, and warmth because that’s exactly what you give to me every single day. I want this letter to be something you can come back to whenever you need to feel loved, safe, and reminded of how special you are not just to me, but to everyone who’s lucky enough to know you.' },
     { type: 'body', text: 'When I look back to the day we met in November 2024, I still remember how I felt. I didn’t know that moment would change my life in such a deep way. You came into my world quietly, like a gentle wave, and suddenly everything felt lighter. I didn’t expect that someone could make my days brighter just by being around, but you did. There was something about you the way you smiled, the way you talked, the way your presence made things feel calm yet exciting at the same time.' },
@@ -113,26 +105,49 @@ document.addEventListener('DOMContentLoaded', () => {
     audioEl.play().catch((e) => handleAudioError(e, index));
   }
 
-  /* --- NEW: Constellation Background w/ Shooting Stars --- */
+  /* --- NEW: Constellation Background w/ Libra & Shooting Stars --- */
   function initConstellation() {
     const ctx = canvas.getContext('2d');
-    let width, height, particles, shootingStars;
+    if (!ctx) {
+        console.error("Canvas context not found");
+        return;
+    }
+    let width, height, particles, twinklingStars, shootingStars;
     
+    // --- NEW: Coordinates for Libra constellation ---
+    // Normalized (0-1) coordinates, simple representation
+    const libraStars = [
+        [0.1, 0.4], [0.2, 0.5], [0.4, 0.6], [0.5, 0.4], 
+        [0.8, 0.2], [0.9, 0.3], [0.4, 0.6], [0.2, 0.7] 
+    ];
+    const libraLines = [
+        [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [2, 6], [1, 7]
+    ];
+
     function resize() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
-      particles = Array.from({length: 100}, () => ({
+      
+      particles = Array.from({length: 80}, () => ({ // Reduced particle count
         x: Math.random() * width,
         y: Math.random() * height,
         vx: Math.random() * 0.2 - 0.1,
         vy: Math.random() * 0.4 - 0.2,
-        radius: 1 + Math.random() * 1.5
+        radius: 1 + Math.random() * 1
       }));
+
+      twinklingStars = Array.from({length: 20}, () => ({ // Twinkling stars
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 1.5,
+        alpha: 0.1 + Math.random() * 0.5,
+        alphaChange: 0.01 + Math.random() * 0.01
+      }));
+
       shootingStars = [];
     }
     
     function draw() {
-      if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
       
       // Draw particles
@@ -140,48 +155,73 @@ document.addEventListener('DOMContentLoaded', () => {
       particles.forEach(p => {
         p.x += p.vx;
         p.y += p.vy;
-        
-        if (p.x < 0) p.x = width;
-        if (p.x > width) p.x = 0;
-        if (p.y < 0) p.y = height;
-        if (p.y > height) p.y = 0;
-        
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
+        if (p.x < 0) p.x = width; if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height; if (p.y > height) p.y = 0;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
       });
       
       // Draw connecting lines
-      ctx.strokeStyle = 'rgba(255, 192, 203, 0.15)';
+      ctx.strokeStyle = 'rgba(255, 192, 203, 0.1)';
+      ctx.lineWidth = 0.5;
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          
+          const dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
           if (dist < 120) {
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
           }
         }
       }
 
-      // --- NEW: Shooting Stars ---
-      // Spawn new shooting stars
-      if (Math.random() > 0.99 && shootingStars.length < 3) {
+      // --- NEW: Draw Libra Constellation ---
+      const constellationWidth = width * 0.4;
+      const constellationHeight = height * 0.4;
+      const offsetX = width * 0.3;
+      const offsetY = height * 0.2;
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+      ctx.strokeStyle = 'rgba(255, 219, 230, 0.5)';
+      ctx.lineWidth = 1;
+      
+      const starPoints = libraStars.map(s => ({
+          x: s[0] * constellationWidth + offsetX,
+          y: s[1] * constellationHeight + offsetY
+      }));
+
+      starPoints.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2); // Make Libra stars bigger
+          ctx.fill();
+      });
+
+      libraLines.forEach(line => {
+          ctx.beginPath();
+          ctx.moveTo(starPoints[line[0]].x, starPoints[line[0]].y);
+          ctx.lineTo(starPoints[line[1]].x, starPoints[line[1]].y);
+          ctx.stroke();
+      });
+
+
+      // --- NEW: Draw Twinkling Stars ---
+      twinklingStars.forEach(s => {
+          s.alpha += s.alphaChange;
+          if (s.alpha <= 0.1 || s.alpha >= 1) {
+              s.alphaChange *= -1;
+          }
+          ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
+          ctx.beginPath(); ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2); ctx.fill();
+      });
+
+      // --- NEW: Draw Shooting Stars (More Frequent) ---
+      if (Math.random() > 0.985 && shootingStars.length < 5) { // Spawn more
         shootingStars.push({
-          x: Math.random() * width,
-          y: Math.random() * 100, // Start near top
+          x: Math.random() * width, y: Math.random() * 100,
           len: 100 + Math.random() * 100,
-          vx: 5 + Math.random() * 5, // Fast
-          vy: 3 + Math.random() * 3, // Fast
-          life: 1.0, // Opacity
+          vx: 5 + Math.random() * 5, vy: 3 + Math.random() * 3,
+          life: 1.0,
         });
       }
 
-      // Draw and update shooting stars
       ctx.lineCap = 'round';
       shootingStars.forEach((s, i) => {
         if (s.life <= 0) {
@@ -193,10 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ctx.strokeStyle = `rgba(255, 255, 255, ${s.life * 0.5})`;
           ctx.lineWidth = 2;
           ctx.stroke();
-          
-          s.x += s.vx;
-          s.y += s.vy;
-          s.life -= 0.01;
+          s.x += s.vx; s.y += s.vy; s.life -= 0.01;
         }
       });
       
@@ -221,19 +258,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Populate Letter Slides
     CONFIG.letter.forEach(slide => {
       const item = document.createElement('div');
-      // e.g., "letter-slide" and "letter-slide-body"
       item.className = `letter-slide ${slide.type}`; 
-      
-      // Convert newlines in text to <br> tags
       item.innerHTML = slide.text.replace(/\n/g, '<br>');
-      
       letterBox.appendChild(item);
     });
   }
 
   /* --- NEW: Setup Intersection Observer (for photos AND letter) --- */
   function setupIntersectionObserver() {
-    // Watch both photos and letter slides
     const items = document.querySelectorAll('.carousel-item, .letter-slide');
     
     const observer = new IntersectionObserver((entries) => {
@@ -241,22 +273,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
         } else {
-          // Keep this simple: only fade in. Fading out is complex
-          // and can be annoying if you scroll back up.
-          // For a robust fade-out, you'd check entry.boundingClientRect.y
-          
-          // Let's enable fade-out *only* if scrolling down
-          if (entry.boundingClientRect.top < 0) {
-             // Do nothing, keep it visible
-          } else {
+          if (entry.boundingClientRect.top > 0) {
+            // It's below the viewport, fade it out
             entry.target.classList.remove('is-visible');
           }
         }
       });
     }, {
       root: app, // We observe scrolling *within* the #app container
-      rootMargin: '0px',
-      threshold: 0.2 // Trigger when 20% of the item is visible
+      rootMargin: '0px 0px -15% 0px', // Trigger 15% from bottom
+      threshold: 0.1 // Trigger when 10% of the item is visible
     });
 
     items.forEach(item => {
@@ -271,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     try {
       if (typeof jsPDF === 'undefined') {
-        alert("Error: PDF library not loaded.");
+        alert("Error: PDF library not loaded. Please try again.");
         downloadPdf.textContent = originalText;
         return;
       }
@@ -282,9 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const pageHeight = doc.internal.pageSize.getHeight();
       const pageWidth = doc.internal.pageSize.getWidth();
       const usableWidth = pageWidth - (margin * 2);
-      let cursorY = margin + 20; // Start cursor
+      let cursorY = margin + 20;
 
-      // Function to check and add new page
       function checkPageBreak(lineHeight) {
         if (cursorY + lineHeight > pageHeight - margin) {
           doc.addPage();
@@ -295,34 +320,42 @@ document.addEventListener('DOMContentLoaded', () => {
       CONFIG.letter.forEach(slide => {
         let textLines;
         switch(slide.type) {
+          case 'libra':
+            checkPageBreak(30);
+            doc.setFont('times', 'normal');
+            doc.setFontSize(18);
+            doc.text(slide.text, pageWidth / 2, cursorY, { align: 'center' });
+            cursorY += 30;
+            break;
           case 'date':
             checkPageBreak(30);
             doc.setFont('times', 'italic');
             doc.setFontSize(11);
-            doc.text(slide.text, margin, cursorY);
+            doc.text(slide.text, pageWidth - margin, cursorY, { align: 'right' });
             cursorY += 30;
             break;
-            
           case 'salutation':
             checkPageBreak(40);
-            doc.setFont('times', 'bold'); // 'Great Vibes' isn't standard in jsPDF
+            doc.setFont('times', 'bold');
             doc.setFontSize(18);
             doc.text(slide.text, margin, cursorY);
             cursorY += 40;
             break;
-            
           case 'body':
-            checkPageBreak(30);
+            checkPageBreak(25);
             doc.setFont('times', 'normal');
             doc.setFontSize(11);
             textLines = doc.splitTextToSize(slide.text, usableWidth);
+            if (cursorY + (textLines.length * 12) > pageHeight - margin) {
+              doc.addPage();
+              cursorY = margin;
+            }
             doc.text(textLines, margin, cursorY);
-            cursorY += (textLines.length * 11) + 11; // Add paragraph spacing
+            cursorY += (textLines.length * 12) + 12; // Add paragraph spacing
             break;
-            
           case 'closing':
             checkPageBreak(20);
-            doc.setFont('times', 'bold'); // 'Great Vibes'
+            doc.setFont('times', 'bold');
             doc.setFontSize(18);
             doc.text(slide.text, margin, cursorY);
             cursorY += 20;
@@ -330,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      doc.save("Happy_Birthday_Letter.pdf");
+      doc.save("Happy_Birthday_Letter_for_Daniele.pdf");
       downloadPdf.textContent = originalText;
 
     } catch (e) {
@@ -408,12 +441,12 @@ document.addEventListener('DOMContentLoaded', () => {
     intro.style.opacity = 0;
     intro.setAttribute('aria-hidden', 'true');
     setTimeout(()=> {
-      intro.style.display = 'none';
+      intro.style.display = 'none'; // Use display:none to unblock page
       app.classList.remove('hidden');
       
-      // --- BUG FIX IS HERE ---
-      // This line was outside the click handler,
-      // breaking the button. Now it's inside.
+      // --- CRITICAL BUG FIX ---
+      // This line locks the body scroll *after*
+      // the intro screen is gone, allowing #app to scroll.
       document.body.style.overflow = 'hidden'; 
       
       app.classList.add('loaded');
@@ -447,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
     playSong(0);
   });
   
-  // No style on body at load, let intro screen be clickable
+  // By default, body is scrollable so intro works.
 
 }); // End DOMContentLoaded
 
