@@ -15,6 +15,8 @@
 </head>
 <body>
 
+<canvas id="constellation-bg"></canvas>
+
 <div id="intro-screen" role="dialog" aria-modal="true">
   <h1>Happy Birthday, My Baby 🎂</h1>
   <p class="sub">Tap Start to begin </p>
@@ -22,8 +24,7 @@
 </div>
 
 <main id="app" class="hidden" aria-live="polite" aria-hidden="true">
-  <div id="bg-decor" aria-hidden="true"></div>
-
+  
   <header class="hero">
     <h2 class="title">Our Moments </h2>
     <div class="controls">
@@ -32,25 +33,21 @@
     </div>
   </header>
 
-  <section class="gallery-wrap">
-    <div class="flip-card-container">
-      <div class="flip-card" id="gallery-card">
-        
-        <div class="flip-card-front">
-          <img id="gallery-image" src="" alt="Our Moment">
-        </div>
-        
-        <div class="flip-card-back">
-          <p id="gallery-caption"></p>
-        </div>
+  <div class="scroll-prompt">
+    <p>Scroll down to read</p>
+    <span></span>
+  </div>
 
+  <section class="gallery-section">
+    <div class="gallery-carousel">
       </div>
-    </div>
   </section>
 
   <section id="letterBox">
-    <div id="typed" class="typing"></div>
+    <div id="letter-text">
+      </div>
   </section>
+
 </main>
 
 <div id="finalOverlay" aria-hidden="true">
